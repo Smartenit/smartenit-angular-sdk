@@ -1,5 +1,7 @@
 import { NgModule, ModuleWithProviders } from '@angular/core';
 
+export { AppConfiguration } from '../common/app-configuration';
+import { ISmartenitConfig } from '../smartenit-config.interface';
 import { EventsManagerService } from '../common/events-manager.service';
 import { HttpInterceptor } from '../common/http-interceptor.service';
 import { AuthService } from '../auth/auth.service';
@@ -71,6 +73,15 @@ const providers = [
     ]
 })
 export class SmartenitModule {
+
+    static withConfig(config: ISmartenitConfig): ModuleWithProviders {
+        AppConfiguration.config = config;
+
+        return {
+              ngModule: SmartenitModule,
+              providers: providers
+        };
+    }
 
     /**
      * Use in AppModule: new instance of SumService.
