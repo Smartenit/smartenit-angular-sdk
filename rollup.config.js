@@ -8,7 +8,7 @@ const globals = {
     'rxjs/Observer': 'Rx',
     'rxjs/Subject': 'Rx',
     'rxjs/add/operator/map': 'Rx',
-    'localforage': 'LocalForage'
+    'localforage': 'localforage'
 };
 
 export default {

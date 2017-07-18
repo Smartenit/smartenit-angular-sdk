@@ -1,4 +1,6 @@
-import * as localforage from "localforage";
+const LocalForage = require('localforage');
+
+//import LocalForage from "localforage";
 import { Observable } from "rxjs/Observable";
 import { IStorageItem } from "./storage-item.interface";
 import { Model } from "../common/model";
@@ -9,7 +11,7 @@ export class DatabaseCollection {
   private _instance: any;
 
   constructor(public name: string) {
-    this._instance = localforage.createInstance({
+    this._instance = LocalForage.createInstance({
       name: name
     });
   }

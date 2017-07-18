@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 
-import * as localforage from "localforage";
+const LocalForage = require('localforage');
+
 import { DatabaseCollection } from "./database-collection";
 
 @Injectable()
@@ -8,9 +9,11 @@ export class DatabaseService {
     private _instances: any = {};
 
     constructor() {
-        localforage.config({
+        this._instances = {};
+        console.log(LocalForage);
+        LocalForage.config({
             name: 'smartenit',
-            driver: localforage.WEBSQL,
+            driver: LocalForage.WEBSQL,
             version: 1.1,
         });
     }
