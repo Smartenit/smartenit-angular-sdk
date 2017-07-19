@@ -5,16 +5,16 @@
 To install this library, run:
 
 ```bash
-$ npm install smartenit-sdk-angular2 --save
+$ npm install smartenit-angular-sdk-angular --save --save-exact
 ```
 
 ## Using Smartenit Module
 
-Include Smartenit Module on your Angular 2 main module:
+Include Smartenit Module on your Angular main module:
 
 ```typescript
 // ...
-import { SmartenitModule } from 'smartenit-sdk-angular2/dist';
+import { SmartenitModule } from 'smartenit-angular-sdk';
 
 @NgModule({
   imports: [
@@ -38,7 +38,7 @@ Service to store information locally, it supports a `ttl` (time to live) attribu
 If the data is expired will return: `null`
 
 ```typescript
-import {StorageService} from 'smartenit-sdk-angular2/dist';
+import {StorageService} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public storage: StorageService) { }
@@ -66,7 +66,7 @@ export class Page1 {
 This service manages the current user session, and user login.
 
 ```typescript
-import {AuthService} from 'smartenit-sdk-angular2/dist';
+import {AuthService} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public authService: AuthService) { }
@@ -90,7 +90,7 @@ This service interacts with OAuth2 Smartenit server
 #### login
 This method authenticates an user using `password` grant. In order to use this grant client id and secret muse be set
 ```typescript
-import {Oauth2Service} from 'smartenit-sdk-angular2/dist';
+import {Oauth2Service} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public oauthResource: Oauth2Service) { }
@@ -109,7 +109,7 @@ export class Page1 {
 #### logout
 This method clears the curren user session
 ```typescript
-import {Oauth2Service} from 'smartenit-sdk-angular2/dist';
+import {Oauth2Service} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public oauthResource: Oauth2Service) { }
@@ -161,7 +161,7 @@ to handle cache. This method can be use to upload media for the following resour
 The following example uploads the main image of the location identified with `247d9e3b7c40af67db435000`
 
 ```typescript
-import {MediaService} from 'smartenit-sdk-angular2/dist';
+import {MediaService} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public mediaService: MediaService) { }
@@ -276,7 +276,7 @@ Interacts with users Smartenit API
 #### save
 
 ```typescript
-import {UsersService} from 'smartenit-sdk-angular2/dist';
+import {UsersService} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public users: UsersService) { }
@@ -320,7 +320,7 @@ oauthResource.authenticateClient('1838SDE...', 'DTXsnv3I7....')
 Interacts with Smartenit API locations 
 
 ```typescript
-import {LocationsService} from 'smartenit-sdk-angular2/dist';
+import {LocationsService} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public locations: LocationsService) { }
@@ -341,7 +341,7 @@ export class Page1 {
 Interacts with Smartenit API device categories 
 
 ```typescript
-import {CategoriesService} from 'smartenit-sdk-angular2/dist';
+import {CategoriesService} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public categories: CategoriesService) { }
@@ -367,7 +367,7 @@ Interacts with Smartenit API devices
 Checks for devices in the same local network
 
 ```typescript
-import {DevicesService} from 'smartenit-sdk-angular2/dist';
+import {DevicesService} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public devices: DevicesService) { }
@@ -388,7 +388,7 @@ export class Page1 {
 Links a discovered device to the logged account by providing the deviceId
 
 ```typescript
-import {DevicesService} from 'smartenit-sdk-angular2/dist';
+import {DevicesService} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public devices: DevicesService) { }
@@ -407,7 +407,7 @@ export class Page1 {
 Interacts with Smartenit API events
 
 ```typescript
-import {EventsService} from 'smartenit-sdk-angular2/dist';
+import {EventsService} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public events: EventsService) { }
@@ -429,7 +429,7 @@ export class Page1 {
 Interacts with Smartenit API scenes
 
 ```typescript
-import {ScenesService} from 'smartenit-sdk-angular2/dist';
+import {ScenesService} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public scenes: ScenesService) { }
@@ -451,7 +451,7 @@ export class Page1 {
 Interacts with Smartenit API wizards
 
 ```typescript
-import {WizardsService} from 'smartenit-sdk-angular2/dist';
+import {WizardsService} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public wizards: WizardsService) { }
@@ -472,7 +472,7 @@ export class Page1 {
 Interacts with Smartenit API areas
 
 ```typescript
-import {AreasService} from 'smartenit-sdk-angular2/dist';
+import {AreasService} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public areas: AreasService) { }
@@ -493,7 +493,7 @@ export class Page1 {
 Interacts with Smartenit API actions
 
 ```typescript
-import {ActionsService} from 'smartenit-sdk-angular2/dist';
+import {ActionsService} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public actions: ActionsService) { }
@@ -514,7 +514,7 @@ export class Page1 {
 Interacts with Smartenit API conditions
 
 ```typescript
-import {ConditionsService} from 'smartenit-sdk-angular2/dist';
+import {ConditionsService} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public conditions: ConditionsService) { }
@@ -535,7 +535,7 @@ export class Page1 {
 Interacts with Smartenit API effects
 
 ```typescript
-import {EffectsService} from 'smartenit-sdk-angular2/dist';
+import {EffectsService} from 'smartenit-angular-sdk';
 
 export class Page1 {
     constructor(public effects: EffectsService) { }
@@ -599,7 +599,7 @@ requesting a device list, the DevicesService will create a Device object for eac
 supported plugins will be loaded into the device so the user can control and receive telemetry from the device in real-time.
 ```typescript
 
-import {Device} from 'smartenit-sdk-angular2/dist';
+import {Device} from 'smartenit-angular-sdk';
 
 ...
 
@@ -638,7 +638,7 @@ This class encapsulates a single Switch (On/Off) component in a device. It has t
 * isOff: Returns `true` when a device component is off `false` otherwise
 
 ```typescript
-import {OnOffPlugin} from 'smartenit-sdk-angular2/dist';
+import {OnOffPlugin} from 'smartenit-angular-sdk';
 
 ...
 
@@ -670,7 +670,7 @@ This class encapsulates a metering device component in a device. It has the foll
 * getInstantaneousDemand: Returns the instantaneous demand
 
 ```typescript
-import {SimpleMeteringServerPlugin} from 'smartenit-sdk-angular2/dist';
+import {SimpleMeteringServerPlugin} from 'smartenit-angular-sdk';
 
 ...
 
@@ -695,7 +695,7 @@ This class encapsulates a component that has a level control (Dimmer). It has th
 * setLevel: Sets the current level of the device component
 
 ```typescript
-import {LevelControlServerPlugin} from 'smartenit-sdk-angular2/dist';
+import {LevelControlServerPlugin} from 'smartenit-angular-sdk';
 
 ...
 
@@ -717,7 +717,7 @@ This class encapsulates a component that can discover other devices on the same 
 can discover Zigbee devices. The discovery process progress is persisted on the local cache.
 
 ```typescript
-import {DiscoverPlugin} from 'smartenit-sdk-angular2/dist';
+import {DiscoverPlugin} from 'smartenit-angular-sdk';
 
 ...
 
@@ -742,7 +742,7 @@ devicesService.list({'components.processors.name': 'Discover'}, {limit: 5}).subs
 This class provides an interface to basic device information
 
 ```typescript
-import {DiscoverPlugin} from 'smartenit-sdk-angular2/dist';
+import {DiscoverPlugin} from 'smartenit-angular-sdk';
 
 ...
 
