@@ -5,7 +5,7 @@ import { WebSocketsService } from '../websockets/websockets.service';
 import { ISmartenitConfig } from "../smartenit-config.interface";
 import { Observable } from "rxjs/Observable";
 import { Subject } from "rxjs/Subject";
-import { AppConfiguration } from "../common/app-configuration";
+import { AppConfigurationService } from "../common/app-configuration.service";
 import { EventsManagerService } from "../common/events-manager.service";
 
 const TOKEN_AHEAD_EXPIRATION = 60; // seconds
@@ -26,7 +26,8 @@ export class AuthService {
     constructor(
         private storage: StorageService,
         private database: DatabaseService,
-        private eventsManagerService: EventsManagerService
+        private eventsManagerService: EventsManagerService,
+        private AppConfiguration: AppConfigurationService
     ) {
         this._tokenWillExpire = new Subject<any>();
 

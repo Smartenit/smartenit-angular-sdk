@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { AppConfiguration } from '../common/app-configuration';
+import { AppConfigurationService } from "../common/app-configuration.service";
 import { SyncService } from '../storage/sync.service';
 import { DevicesService } from '../resources/devices.service';
 
@@ -12,11 +12,12 @@ export class GatewayConnectivityService {
 
   constructor(
     private syncService: SyncService,
-    private devicesService: DevicesService
+    private devicesService: DevicesService,
+    private AppConfiguration: AppConfigurationService
   ) { }
 
   public startCheckCycle() {
-    if (!AppConfiguration.currentConfig.currentGateway) {
+    if (!this.AppConfiguration.currentConfig.currentGateway) {
       if (!this.checkInterval) {
         this.checkGatewayConnectivity();
         this.checkInterval = setInterval(() => {

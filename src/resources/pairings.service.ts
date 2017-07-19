@@ -14,6 +14,7 @@ import { IWebSocketDeviceMessage } from "../websockets/websocket-device-message.
 import { Observable } from "rxjs/Observable";
 import { Subject } from "rxjs/Subject";
 import { HttpInterceptor } from "../common/http-interceptor.service";
+import { AppConfigurationService } from "../common/app-configuration.service";
 
 @Injectable()
 export class PairingsService extends PersistentCRUDService {
@@ -26,9 +27,10 @@ export class PairingsService extends PersistentCRUDService {
   constructor(
     http: HttpInterceptor, authService: AuthService, public dbService: DatabaseService,
     public webSocketsService: WebSocketsService,
-    syncService: SyncService, dataQueryService: DataQueryService, eventsService: EventsManagerService
+    syncService: SyncService, dataQueryService: DataQueryService, eventsService: EventsManagerService,
+    AppConfiguration: AppConfigurationService
   ) {
-    super('pairings', http, authService, dbService, syncService, dataQueryService, eventsService);
+    super('pairings', http, authService, dbService, syncService, dataQueryService, eventsService, AppConfiguration);
     this._onPairingRefresh = new Subject<any>();
     this.webSocketsService.onPairingsMessage.subscribe((message: IWebSocketDeviceMessage) => {
       if (message.resourceId == 'refresh') {

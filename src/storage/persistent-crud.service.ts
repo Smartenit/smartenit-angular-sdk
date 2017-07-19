@@ -7,7 +7,7 @@ import 'rxjs/add/operator/share';
 import { AuthService } from "../auth/auth.service";
 import { EventsManagerService } from "../common/events-manager.service";
 import { ISmartenitConfig } from "../smartenit-config.interface";
-import { AppConfiguration, BACKEND_DATA_LIMIT } from '../common/app-configuration';
+import { AppConfigurationService, BACKEND_DATA_LIMIT } from '../common/app-configuration.service';
 import { CRUDService } from "../common/crud.service";
 import { IRequestOptions } from "../common/request-options.interface";
 import { DataQueryService } from "../common/data-query.service";
@@ -29,9 +29,10 @@ export abstract class PersistentCRUDService extends CRUDService {
     dbService: DatabaseService,
     private syncService: SyncService,
     private dataQueryService: DataQueryService,
-    public eventsService: EventsManagerService
+    public eventsService: EventsManagerService,
+    public AppConfiguration: AppConfigurationService
   ) {
-    super(resource, http, authService, eventsService);
+    super(resource, http, authService, eventsService, AppConfiguration);
     this.resource = resource;
     this.collection = dbService.getCollection(resource);
   }
@@ -47,7 +48,7 @@ export abstract class PersistentCRUDService extends CRUDService {
   }
 
   save(data: any, options?: IRequestOptions): Observable<any> {
-    if (AppConfiguration.currentConfig.offlineMode && AppConfiguration.currentConfig.useOfflineOperations) {
+    if (this.AppConfiguration.currentConfig.offlineMode && this.AppConfiguration.currentConfig.useOfflineOperations) {
       return this.syncService.processOfflineSave(this.resource, data);
     } else {
       return super.save(data, options).flatMap((apiData) => {
@@ -159,7 +160,7 @@ export abstract class PersistentCRUDService extends CRUDService {
   }
 
   remove(path: string, data?: any, options?: IRequestOptions): Observable<any> {
-    if (AppConfiguration.currentConfig.offlineMode && AppConfiguration.currentConfig.useOfflineOperations) {
+    if (this.AppConfiguration.currentConfig.offlineMode && this.AppConfiguration.currentConfig.useOfflineOperations) {
       return this.syncService.processOfflineDelete(this.resource, path);
     } else {
       return super.remove(path, data, options).flatMap((removeData) => {

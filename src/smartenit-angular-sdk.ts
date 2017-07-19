@@ -11,7 +11,7 @@ export { WebSocketsService } from './websockets/websockets.service';
 export { DeviceReferenceService } from './common/device-reference.service';
 export { LocalConnectionService } from './common/local-connection.service';
 export { SyncService } from './storage/sync.service';
-export { AppConfiguration } from './common/app-configuration';
+export { AppConfigurationService } from './common/app-configuration.service';
 export { ActionsService } from './resources/actions.service';
 export { MediaService } from './resources/media.service';
 export { AreasService } from './resources/areas.service';

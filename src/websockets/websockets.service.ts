@@ -10,6 +10,7 @@ import { IWebSocketDeviceMessage } from "./websocket-device-message.interface";
 import { Observable } from 'rxjs/Observable';
 import { Subject } from "rxjs/Subject";
 import { HttpInterceptor } from "../common/http-interceptor.service";
+import { AppConfigurationService } from "../common/app-configuration.service";
 
 declare let Paho: any;
 
@@ -69,8 +70,12 @@ export class WebSocketsService extends APIClientService {
     return this._onReady.asObservable();
   }
 
-  constructor(http: HttpInterceptor, authService: AuthService, public oauthService: Oauth2Service, public eventsService: EventsManagerService) {
-    super('websockets', http, authService, eventsService);
+  constructor(
+    http: HttpInterceptor, authService: AuthService,
+    public oauthService: Oauth2Service, public eventsService: EventsManagerService,
+    AppConfiguration: AppConfigurationService
+  ) {
+    super('websockets', http, authService, eventsService, AppConfiguration);
     this._isConnected = false;
 
     this._onDeviceMessage = new Subject();

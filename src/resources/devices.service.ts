@@ -14,6 +14,7 @@ import { WebSocketsService } from "../websockets/websockets.service";
 import { PluginFactoryService } from "../plugins/plugin-factory.service";
 import { DeviceModel } from "../models/device.model";
 import { HttpInterceptor } from "../common/http-interceptor.service";
+import { AppConfigurationService } from "../common/app-configuration.service";
 
 @Injectable()
 export class DevicesService extends PersistentCRUDService {
@@ -27,9 +28,10 @@ export class DevicesService extends PersistentCRUDService {
     public pluginFactory: PluginFactoryService,
     syncService: SyncService,
     dataQueryService: DataQueryService,
-    eventsService: EventsManagerService
+    eventsService: EventsManagerService,
+    AppConfiguration: AppConfigurationService
   ) {
-    super('devices', http, authService, dbService, syncService, dataQueryService, eventsService);
+    super('devices', http, authService, dbService, syncService, dataQueryService, eventsService, AppConfiguration);
   }
 
   discover(discoverOnlyNewDevices?: boolean): Observable<any> {

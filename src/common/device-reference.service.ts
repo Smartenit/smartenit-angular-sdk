@@ -10,6 +10,7 @@ import { DatabaseService } from "../storage/database.service";
 import { IRequestOptions } from "./request-options.interface";
 import { ISmartenitConfig } from "../smartenit-config.interface";
 import { HttpInterceptor } from "../common/http-interceptor.service";
+import { AppConfigurationService } from "../common/app-configuration.service";
 
 const DEVICE_REFERENCE = 'device_reference';
 
@@ -43,9 +44,10 @@ export class DeviceReferenceService extends APIClientService {
     http: HttpInterceptor,
     authService: AuthService,
     public databaseService: DatabaseService,
-    public eventsService: EventsManagerService
+    public eventsService: EventsManagerService,
+    public AppConfiguration: AppConfigurationService
   ) {
-    super('devices', http, authService, eventsService);
+    super('devices', http, authService, eventsService, AppConfiguration);
   }
 
   loadFile() {

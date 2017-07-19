@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 
-import { Subject } from 'rxjs/Subject'; 
+import { Subject } from 'rxjs/Subject';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
@@ -11,14 +11,14 @@ import { Oauth2Service } from '../resources/oauth-2.service';
 import { LocalConnectionService } from '../common/local-connection.service';
 import { ISmartenitConfig } from "../smartenit-config.interface";
 import { IRequestOptions } from "./request-options.interface";
-import { AppConfiguration } from "../common/app-configuration";
+import { AppConfigurationService } from "../common/app-configuration.service";
 import { EventsManagerService } from "../common/events-manager.service";
 import { HttpInterceptor } from "../common/http-interceptor.service";
 
 @Injectable()
 export class APIClientService {
   get apiURL(): string {
-    return AppConfiguration.currentAPIURL;
+    return this.AppConfiguration.currentAPIURL;
   }
 
   _onServerError: Subject<any> = new Subject();
@@ -31,7 +31,8 @@ export class APIClientService {
     protected defaultPath: string,
     protected http: HttpInterceptor,
     public authService: AuthService,
-    public eventsManagerService: EventsManagerService
+    public eventsManagerService: EventsManagerService,
+    public AppConfiguration: AppConfigurationService
   ) {
     this.defaultPath = defaultPath ? defaultPath : '';
   }
@@ -75,7 +76,7 @@ export class APIClientService {
          * code 114 means Invalid access_token
          */
         if (accessToken && errors.length && (errors[0].code === 114 || errors[0].code === 115)) {
-          const oauth2Service = new Oauth2Service(this.http, this.authService, this.eventsManagerService);
+          const oauth2Service = new Oauth2Service(this.http, this.authService, this.eventsManagerService, this.AppConfiguration);
           return oauth2Service.refreshToken()
             .do(response => this.get(resourcePath, innerOptions));
         }
@@ -140,7 +141,7 @@ export class APIClientService {
          * code 114 means Invalid access_token
          */
         if (accessToken && errors.length && (errors[0].code === 114 || errors[0].code === 115)) {
-          const oauth2Service = new Oauth2Service(this.http, this.authService, this.eventsManagerService);
+          const oauth2Service = new Oauth2Service(this.http, this.authService, this.eventsManagerService, this.AppConfiguration);
           return oauth2Service.refreshToken()
             .do(response => this.remove(resourcePath, innerOptions));
         }
@@ -202,7 +203,7 @@ export class APIClientService {
          * code 114 means Invalid access_token
          */
         if (accessToken && errors.length && (errors[0].code === 114 || errors[0].code === 115)) {
-          const oauth2Service = new Oauth2Service(this.http, this.authService, this.eventsManagerService);
+          const oauth2Service = new Oauth2Service(this.http, this.authService, this.eventsManagerService, this.AppConfiguration);
           return oauth2Service.refreshToken()
             .do(response => this.post(resourcePath, innerOptions));
         }
@@ -255,7 +256,7 @@ export class APIClientService {
          * code 114 means Invalid access_token
          */
         if (accessToken && errors.length && (errors[0].code === 114 || errors[0].code === 115)) {
-          const oauth2Service = new Oauth2Service(this.http, this.authService, this.eventsManagerService);
+          const oauth2Service = new Oauth2Service(this.http, this.authService, this.eventsManagerService, this.AppConfiguration);
           return oauth2Service.refreshToken()
             .do(response => this.put(resourcePath, innerOptions));
         }

@@ -7,11 +7,16 @@ import { ISmartenitConfig } from "../smartenit-config.interface";
 import { APIClientService } from "../common/api-client.service";
 import { Observable } from "rxjs/Observable";
 import { HttpInterceptor } from "../common/http-interceptor.service";
+import { AppConfigurationService } from "../common/app-configuration.service";
 
 @Injectable()
 export class MediaService extends APIClientService {
-    constructor(http: HttpInterceptor, authService: AuthService, eventsService: EventsManagerService) {
-        super('media', http, authService, eventsService);
+    constructor(
+        http: HttpInterceptor, authService: AuthService,
+        eventsService: EventsManagerService,
+        AppConfiguration: AppConfigurationService
+    ) {
+        super('media', http, authService, eventsService, AppConfiguration);
     }
 
     uploadBase64(data: string, fileName: string, resource: string, resourceId: string): Observable<any> {

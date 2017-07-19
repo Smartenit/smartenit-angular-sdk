@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core"
 import { Observable } from 'rxjs/Observable';
 import { Subject } from "rxjs/Subject";
 import { EventsManagerService } from "../common/events-manager.service";
-import { AppConfiguration } from "../common/app-configuration";
+import { AppConfigurationService } from "../common/app-configuration.service";
 
 import "rxjs/add/observable/throw"
 import "rxjs/add/observable/empty";
@@ -27,7 +27,8 @@ export class HttpInterceptor extends Http {
     backend: XHRBackend,
     options: RequestOptions,
     public http: Http,
-    public eventsManagerService: EventsManagerService
+    public eventsManagerService: EventsManagerService,
+    public AppConfiguration: AppConfigurationService
   ) {
     super(backend, options);
 
@@ -59,7 +60,7 @@ export class HttpInterceptor extends Http {
   }
 
   private drainQueue(newAccessToken?: string) {
-    this.notifier.next({ newAccessToken: newAccessToken, newAPIUrl: AppConfiguration.currentAPIURL });
+    this.notifier.next({ newAccessToken: newAccessToken, newAPIUrl: this.AppConfiguration.currentAPIURL });
   }
 
   private changeAccessTokenForRequest(headers: Headers, newAccessToken?: string): Headers {
@@ -129,7 +130,7 @@ export class HttpInterceptor extends Http {
 
             if (jsonResponse && jsonResponse.access_token) {
               HttpInterceptor._enqueueRequests = false;
-              this.notifier.next({ newAccessToken: 'Bearer ' + jsonResponse.access_token, newAPIUrl: AppConfiguration.currentAPIURL });
+              this.notifier.next({ newAccessToken: 'Bearer ' + jsonResponse.access_token, newAPIUrl: this.AppConfiguration.currentAPIURL });
             }
           }
 
@@ -143,7 +144,7 @@ export class HttpInterceptor extends Http {
             HttpInterceptor._enqueueRequests = true;
 
             if (localUrl.indexOf('oauth2/token') >= 0) {
-              AppConfiguration.restoreInitialConfiguration();
+              this.AppConfiguration.restoreInitialConfiguration();
               return Observable.throw(error);
             } else if (localUrl.indexOf('devices/reference') >= 0) {
               return Observable.throw(error);

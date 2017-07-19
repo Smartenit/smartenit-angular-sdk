@@ -11,14 +11,16 @@ import { PersistentCRUDService } from "../storage/persistent-crud.service";
 import { SyncService } from "../storage/sync.service";
 import { UserModel } from "../models/user.model";
 import { HttpInterceptor } from "../common/http-interceptor.service";
+import { AppConfigurationService } from "../common/app-configuration.service";
 
 @Injectable()
 export class UsersService extends PersistentCRUDService {
   constructor(
     http: HttpInterceptor, authService: AuthService, public dbService: DatabaseService,
-    syncService: SyncService, dataQueryService: DataQueryService, eventsService: EventsManagerService
+    syncService: SyncService, dataQueryService: DataQueryService, eventsService: EventsManagerService,
+    AppConfiguration: AppConfigurationService
   ) {
-    super('users', http, authService, dbService, syncService, dataQueryService, eventsService);
+    super('users', http, authService, dbService, syncService, dataQueryService, eventsService, AppConfiguration);
   }
 
   recoverPassword(username: string): Observable<any> {
@@ -30,7 +32,7 @@ export class UsersService extends PersistentCRUDService {
   }
 
   createClient(userId: string, platform: string, token: string): Observable<any> {
-    return this.post(`${userId}/clients`, {platform: platform, token: token});
+    return this.post(`${userId}/clients`, { platform: platform, token: token });
   }
 
   deleteClient(userId: string, clientId: string) {

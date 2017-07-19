@@ -10,14 +10,16 @@ import { PersistentCRUDService } from "../storage/persistent-crud.service";
 import { SyncService } from "../storage/sync.service";
 import { ControllerModel } from "../models/controller.model";
 import { HttpInterceptor } from "../common/http-interceptor.service";
+import { AppConfigurationService } from "../common/app-configuration.service";
 
 @Injectable()
 export class ControllersService extends PersistentCRUDService {
   constructor(
     http: HttpInterceptor, authService: AuthService, public dbService: DatabaseService,
-    syncService: SyncService, dataQueryService: DataQueryService, eventsService: EventsManagerService
+    syncService: SyncService, dataQueryService: DataQueryService, eventsService: EventsManagerService,
+    AppConfiguration: AppConfigurationService
   ) {
-    super('controllers', http, authService, dbService, syncService, dataQueryService, eventsService);
+    super('controllers', http, authService, dbService, syncService, dataQueryService, eventsService, AppConfiguration);
   }
 
   createModel(data: any): ControllerModel {

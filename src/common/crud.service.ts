@@ -9,6 +9,7 @@ import { Observable } from "rxjs/Observable";
 import { IRequestOptions } from "./request-options.interface";
 import { Model } from "./model";
 import { HttpInterceptor } from "../common/http-interceptor.service";
+import { AppConfigurationService } from "../common/app-configuration.service";
 
 @Injectable()
 export abstract class CRUDService extends APIClientService {
@@ -22,9 +23,10 @@ export abstract class CRUDService extends APIClientService {
     resource: string,
     http: HttpInterceptor,
     authService: AuthService,
-    eventsService: EventsManagerService
+    eventsService: EventsManagerService,
+    AppConfiguration: AppConfigurationService
   ) {
-    super(resource, http, authService, eventsService);
+    super(resource, http, authService, eventsService, AppConfiguration);
     this.resource = resource;
   }
 

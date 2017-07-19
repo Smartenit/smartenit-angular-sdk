@@ -11,7 +11,7 @@ import 'rxjs/add/operator/timeoutWith';
 import { AuthService } from "../auth/auth.service";
 import { Oauth2Service } from "../resources/oauth-2.service";
 import { DeviceModel } from "../models/device.model";
-import { AppConfiguration } from "../common/app-configuration";
+import { AppConfigurationService } from "../common/app-configuration.service";
 import { DevicesService } from "../resources/devices.service";
 import { DatabaseService } from "../storage/database.service";
 import { APIClientService } from "../common/api-client.service";
@@ -30,7 +30,8 @@ export class LocalConnectionService {
     public oauthService: Oauth2Service,
     public devicesService: DevicesService,
     public database: DatabaseService,
-    public eventsService: EventsManagerService
+    public eventsService: EventsManagerService,
+    public AppConfiguration: AppConfigurationService
   ) {
     this.eventsService.onServerConnectivityError.subscribe(({ enqueueRequests }) => {
       if (enqueueRequests && !this.switchingConnection) {
@@ -130,7 +131,7 @@ export class LocalConnectionService {
                 const url = workingRequest.value.url;
                 localGateways.save(workingRequest.value.domain.domain, workingRequest.value.domain).subscribe();
 
-                if (assignConnection && AppConfiguration.currentConfig.useLocalConnection && !this.usingLocalConnection) {
+                if (assignConnection && this.AppConfiguration.currentConfig.useLocalConnection && !this.usingLocalConnection) {
                   anyConnectionAssigned = true;
                   this.setNewAPIURL(url + this.apiVersionUrl, workingRequest.value.domain.gateway, refreshToken);
                 }
@@ -142,7 +143,7 @@ export class LocalConnectionService {
         if (assignConnection && !anyConnectionAssigned) {
           console.log('Local address not available, using remote API');
           this.switchingConnection = false;
-          AppConfiguration.restoreInitialConfiguration();
+          this.AppConfiguration.restoreInitialConfiguration();
           if (refreshToken) {
             this.authService.getNewAccessTokenFromRefreshToken();
           }
@@ -152,7 +153,7 @@ export class LocalConnectionService {
         if (assignConnection && !anyConnectionAssigned) {
           console.log('Local address not available, using remote API');
           this.switchingConnection = false;
-          AppConfiguration.restoreInitialConfiguration();
+          this.AppConfiguration.restoreInitialConfiguration();
           if (refreshToken) {
             this.authService.getNewAccessTokenFromRefreshToken();
           }
@@ -213,8 +214,8 @@ export class LocalConnectionService {
   private setNewAPIURL(url: string, gateway: any, refreshToken = true) {
     this.switchingConnection = false;
 
-    AppConfiguration.setCurrentGateway(gateway);
-    AppConfiguration.setAPIURL(url);
+    this.AppConfiguration.setCurrentGateway(gateway);
+    this.AppConfiguration.setAPIURL(url);
     this.startLocalConnectionTimer();
 
     if (this.authService.isLoggedIn()) {
@@ -232,7 +233,7 @@ export class LocalConnectionService {
   }
 
   checkLocalConnection(refreshToken = true) {
-    if (AppConfiguration.currentConfig.useLocalConnection) {
+    if (this.AppConfiguration.currentConfig.useLocalConnection) {
       console.log('Checking Local Connections...');
 
       // TODO check if current local connection is OK

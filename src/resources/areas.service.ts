@@ -10,6 +10,7 @@ import { PersistentCRUDService } from "../storage/persistent-crud.service";
 import { SyncService } from "../storage/sync.service";
 import { AreaModel } from "../models/area.model";
 import { HttpInterceptor } from "../common/http-interceptor.service";
+import { AppConfigurationService } from "../common/app-configuration.service";
 
 @Injectable()
 export class AreasService extends PersistentCRUDService {
@@ -19,9 +20,10 @@ export class AreasService extends PersistentCRUDService {
     dbService: DatabaseService,
     syncService: SyncService,
     dataQueryService: DataQueryService,
-    eventsService: EventsManagerService
+    eventsService: EventsManagerService,
+    AppConfiguration: AppConfigurationService
   ) {
-    super('areas', http, authService, dbService, syncService, dataQueryService, eventsService);
+    super('areas', http, authService, dbService, syncService, dataQueryService, eventsService, AppConfiguration);
   }
 
   createModel(data: any): AreaModel {

@@ -12,7 +12,7 @@ import 'rxjs/add/operator/defaultIfEmpty';
 
 import { AuthService } from '../auth/auth.service';
 import { EventsManagerService } from "../common/events-manager.service";
-import { AppConfiguration, BACKEND_DATA_LIMIT } from '../common/app-configuration';
+import { AppConfigurationService, BACKEND_DATA_LIMIT } from '../common/app-configuration.service';
 import { APIClientService } from '../common/api-client.service';
 import { DataQueryService } from '../common/data-query.service';
 import { changeValueInObject } from '../common/utils';
@@ -48,9 +48,10 @@ export class SyncService extends APIClientService {
     private dbService: DatabaseService,
     private dataQueryService: DataQueryService,
     private injector: Injector,
-    public eventsService: EventsManagerService
+    public eventsService: EventsManagerService,
+    public AppConfiguration: AppConfigurationService
   ) {
-    super(SYNC_NAME, http, authService, eventsService);
+    super(SYNC_NAME, http, authService, eventsService, AppConfiguration);
     this.useLocalStorage = AppConfiguration.currentConfig.useLocalStorage || false;
     this.useOfflineOperations = AppConfiguration.currentConfig.useOfflineOperations || false;
     this.syncCollection = dbService.getCollection(SYNC_NAME);
@@ -139,7 +140,7 @@ export class SyncService extends APIClientService {
    * Retrieves resources available for sync changes
    */
   private getSyncInfo() {
-    if (!this.useLocalStorage || AppConfiguration.currentConfig.offlineMode)
+    if (!this.useLocalStorage || this.AppConfiguration.currentConfig.offlineMode)
       return Observable.create((o: any) => o.complete());
 
     console.log('Starting synchronization');
@@ -185,7 +186,7 @@ export class SyncService extends APIClientService {
    * @param lastSyncDate Last date of synchronization
    */
   private syncResource(resource: string, lastSyncDate: Date): Observable<any> | undefined {
-    if (!this.useLocalStorage || AppConfiguration.currentConfig.offlineMode) {
+    if (!this.useLocalStorage || this.AppConfiguration.currentConfig.offlineMode) {
       return;
     }
 
@@ -316,7 +317,7 @@ export class SyncService extends APIClientService {
    * Synchronize all operations made in offline mode
    */
   syncOfflineOperations() {
-    if (!this.useOfflineOperations || AppConfiguration.currentConfig.offlineMode)
+    if (!this.useOfflineOperations || this.AppConfiguration.currentConfig.offlineMode)
       return;
 
     console.log('Synchronizing offline data');
@@ -463,7 +464,7 @@ export class SyncService extends APIClientService {
    * @param data Data associated with the save operation
    */
   processOfflineSave(resource: string, data: any): Observable<any> {
-    if (!this.useOfflineOperations || !AppConfiguration.currentConfig.offlineMode) {
+    if (!this.useOfflineOperations || !this.AppConfiguration.currentConfig.offlineMode) {
       return Observable.empty();
     }
 
@@ -498,7 +499,7 @@ export class SyncService extends APIClientService {
    * @param resourceId Id of the resource
    */
   processOfflineDelete(resource: string, resourceId: string): Observable<any> {
-    if (!this.useOfflineOperations || !AppConfiguration.currentConfig.offlineMode) {
+    if (!this.useOfflineOperations || !this.AppConfiguration.currentConfig.offlineMode) {
       return Observable.empty();
     }
 

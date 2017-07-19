@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@angular/core';
 import { ISmartenitConfig } from "../smartenit-config.interface";
 import { Observable } from "rxjs/Observable";
 import { Subject } from "rxjs/Subject";
+import { INITIAL_CONFIG } from "../smartenit-initial-config";
 
 export const BACKEND_DATA_LIMIT = 25;
 
@@ -11,6 +12,10 @@ export class AppConfigurationService {
     private _initialConfig: ISmartenitConfig;
     private _onConfigChange: Subject<any> = new Subject<any>();
     private initialAPIUrl: string;
+
+    constructor( @Inject(INITIAL_CONFIG) config: ISmartenitConfig) {
+        this.initialConfig = config;
+    }
 
     get onConfigChange(): Observable<any> {
         return this._onConfigChange.asObservable();

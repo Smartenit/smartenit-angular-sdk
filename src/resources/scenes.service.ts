@@ -11,15 +11,17 @@ import { SyncService } from "../storage/sync.service";
 import { SceneModel } from "../models/scene.model";
 import { WebSocketsService } from "../websockets/websockets.service";
 import { HttpInterceptor } from "../common/http-interceptor.service";
+import { AppConfigurationService } from "../common/app-configuration.service";
 
 @Injectable()
 export class ScenesService extends PersistentCRUDService {
   constructor(
     http: HttpInterceptor, authService: AuthService, public dbService: DatabaseService,
     public webSocketsService: WebSocketsService,
-    syncService: SyncService, dataQueryService: DataQueryService, eventsService: EventsManagerService
+    syncService: SyncService, dataQueryService: DataQueryService, eventsService: EventsManagerService,
+    AppConfiguration: AppConfigurationService
   ) {
-    super('scenes', http, authService, dbService, syncService, dataQueryService, eventsService);
+    super('scenes', http, authService, dbService, syncService, dataQueryService, eventsService, AppConfiguration);
   }
 
   createModel(data: any): SceneModel {

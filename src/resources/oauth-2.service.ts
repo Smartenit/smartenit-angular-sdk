@@ -8,15 +8,18 @@ import { ISmartenitConfig } from "../smartenit-config.interface";
 import { Observable } from "rxjs/Observable";
 import { Subject } from "rxjs/Subject";
 import { HttpInterceptor } from "../common/http-interceptor.service";
+import { AppConfigurationService } from "../common/app-configuration.service";
 
 import "rxjs/add/operator/do";
 import "rxjs/add/observable/empty";
 
 @Injectable()
 export class Oauth2Service extends APIClientService {
-    constructor(http: HttpInterceptor, authService: AuthService, eventsService: EventsManagerService
+    constructor(
+        http: HttpInterceptor, authService: AuthService, eventsService: EventsManagerService,
+        AppConfiguration: AppConfigurationService
     ) {
-        super('oauth2', http, authService, eventsService);
+        super('oauth2', http, authService, eventsService, AppConfiguration);
         authService.tokenWillExpire.subscribe(() => {
             let subscription = this.refreshToken().subscribe(() => {
                 subscription.unsubscribe();

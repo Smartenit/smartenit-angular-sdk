@@ -12,6 +12,7 @@ import { PersistentCRUDService } from "../storage/persistent-crud.service";
 import { SyncService } from "../storage/sync.service";
 import { EventModel } from "../models/event.model";
 import { HttpInterceptor } from "../common/http-interceptor.service";
+import { AppConfigurationService } from "../common/app-configuration.service";
 
 @Injectable()
 export class EventsService extends PersistentCRUDService {
@@ -21,9 +22,10 @@ export class EventsService extends PersistentCRUDService {
     public dbService: DatabaseService,
     syncService: SyncService,
     dataQueryService: DataQueryService,
-    eventsManagerService: EventsManagerService
+    eventsManagerService: EventsManagerService,
+    AppConfiguration: AppConfigurationService
   ) {
-    super('events', http, authService, dbService, syncService, dataQueryService, eventsManagerService);
+    super('events', http, authService, dbService, syncService, dataQueryService, eventsManagerService, AppConfiguration);
   }
 
   createModel(data: any): EventModel {

@@ -10,14 +10,16 @@ import { PersistentCRUDService } from "../storage/persistent-crud.service";
 import { SyncService } from "../storage/sync.service";
 import { WizardModel } from "../models/wizard.model";
 import { HttpInterceptor } from "../common/http-interceptor.service";
+import { AppConfigurationService } from "../common/app-configuration.service";
 
 @Injectable()
 export class WizardsService extends PersistentCRUDService {
   constructor(
     http: HttpInterceptor, authService: AuthService, public dbService: DatabaseService,
-    syncService: SyncService, dataQueryService: DataQueryService, eventsService: EventsManagerService
+    syncService: SyncService, dataQueryService: DataQueryService, eventsService: EventsManagerService,
+    AppConfiguration: AppConfigurationService
   ) {
-    super('wizards', http, authService, dbService, syncService, dataQueryService, eventsService);
+    super('wizards', http, authService, dbService, syncService, dataQueryService, eventsService, AppConfiguration);
   }
 
   createModel(data: any): WizardModel {
