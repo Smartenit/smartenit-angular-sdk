@@ -8,6 +8,7 @@ import { APIClientService } from "../common/api-client.service";
 import { Observable } from "rxjs/Observable";
 import { HttpInterceptor } from "../common/http-interceptor.service";
 import { AppConfigurationService } from "../common/app-configuration.service";
+import { PersistentCRUDService } from "../storage/persistent-crud.service";
 
 @Injectable()
 export class MediaService extends APIClientService {
@@ -26,5 +27,13 @@ export class MediaService extends APIClientService {
             resource: resource,
             resourceId: resourceId
         });
+    }
+
+    updateLocalImage(service: PersistentCRUDService, resourceId: string, data: any): Observable<any> {
+        if (data && data.data && data.data.url && data.data.version) {
+            return service.mergeInCollection(resourceId, { media: { img: data.data.url, v: data.data.version }});
+        } else {
+            return Observable.of('');
+        }
     }
 }

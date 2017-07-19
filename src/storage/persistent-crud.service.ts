@@ -176,4 +176,15 @@ export abstract class PersistentCRUDService extends CRUDService {
   removeById(resourceId: string, options?: IRequestOptions): Observable<any> {
     return this.remove(resourceId, null, options);
   }
+
+  mergeInCollection(resourceId: string, resource: any): Observable<any> {
+    return this.collection.getById(resourceId)
+      .flatMap((resourceResponse) => {
+        if (resourceResponse) {
+          return this.collection.save(resourceId, Object.assign({}, resourceResponse, resource));
+        } else {
+          return Observable.of(resourceResponse);
+        }
+      });
+  }
 }
