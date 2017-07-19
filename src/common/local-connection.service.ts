@@ -13,6 +13,7 @@ import { Oauth2Service } from "../resources/oauth-2.service";
 import { DeviceModel } from "../models/device.model";
 import { AppConfigurationService } from "../common/app-configuration.service";
 import { DevicesService } from "../resources/devices.service";
+import { DatabaseCollection } from "../storage/database-collection";
 import { DatabaseService } from "../storage/database.service";
 import { APIClientService } from "../common/api-client.service";
 import { EventsManagerService } from "../common/events-manager.service";
@@ -172,43 +173,60 @@ export class LocalConnectionService {
     if (this.authService.isLoggedIn()) {
       // check remote connections
 
-      console.log('Getting Gateways...');
-
-      let subscription = this.devicesService.listFromBackend({
-        type: 'gateway',
-        domain: { $nin: [null, {}, ''] }
-      }).subscribe(gateways => {
-        gateways = gateways.data;
-
-        const domains = gateways.map((gateway: any) => {
-          if (gateway && gateway.domain && gateway.domain.name) {
-            return {
-              gateway: {
-                _id: gateway._id,
-                hwId: gateway.hwId
-              },
-              domain: gateway.domain.name
-            };
-          }
-        });
-
-        if (domains.length > 0) {
-          localGateways.clear();
-          domains.forEach((element: any) => {
-            localGateways.save(element.domain, element).subscribe();
+      localGateways.list().subscribe(urls => {
+        if (!this.AppConfiguration.currentConfig.apiURLSet && urls && urls.length > 0) {
+          let subscription = this.eventsService.onConnectionSetup.subscribe(() => {
+            this.checkGateways(localGateways, assignRemoteConnection, testConnections, refreshToken);
+            subscription.unsubscribe();
+          }, (error) => {
+            subscription.unsubscribe();
+          }, () => {
+            subscription.unsubscribe();
           });
+        } else {
+          this.checkGateways(localGateways, assignRemoteConnection, testConnections, refreshToken);
         }
-
-        if (testConnections) {
-          this.testConnections(domains, assignRemoteConnection, refreshToken);
-        }
-        subscription.unsubscribe();
-      }, (error) => {
-        subscription.unsubscribe();
-      }, () => {
-        subscription.unsubscribe();
       });
     }
+  }
+
+  private checkGateways(localGateways: DatabaseCollection, assignRemoteConnection = true, testConnections = true, refreshToken = true) {
+    console.log('Getting Gateways...');
+
+    let subscription = this.devicesService.listFromBackend({
+      type: 'gateway',
+      domain: { $nin: [null, {}, ''] }
+    }).subscribe(gateways => {
+      gateways = gateways.data;
+
+      const domains = gateways.map((gateway: any) => {
+        if (gateway && gateway.domain && gateway.domain.name) {
+          return {
+            gateway: {
+              _id: gateway._id,
+              hwId: gateway.hwId
+            },
+            domain: gateway.domain.name
+          };
+        }
+      });
+
+      if (domains.length > 0) {
+        localGateways.clear();
+        domains.forEach((element: any) => {
+          localGateways.save(element.domain, element).subscribe();
+        });
+      }
+
+      if (testConnections) {
+        this.testConnections(domains, assignRemoteConnection, refreshToken);
+      }
+      subscription.unsubscribe();
+    }, (error) => {
+      subscription.unsubscribe();
+    }, () => {
+      subscription.unsubscribe();
+    });
   }
 
   private setNewAPIURL(url: string, gateway: any, refreshToken = true) {

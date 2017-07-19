@@ -47,6 +47,7 @@ export class AppConfiguration {
   public static setAPIURL(apiURL: string) {
     console.log('API URL set to: ' + apiURL);
     AppConfiguration._currentConfig.apiURL = apiURL;
+    AppConfiguration._currentConfig.apiURLSet = true;
 
     AppConfiguration._onConfigChange.next({ config: AppConfiguration._currentConfig });
   }
