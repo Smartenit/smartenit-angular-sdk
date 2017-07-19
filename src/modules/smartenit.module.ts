@@ -32,6 +32,7 @@ import { SyncService } from '../storage/sync.service';
 import { ControllersService } from '../resources/controllers.service';
 import { RespondersService } from '../resources/responders.service';
 import { GatewayConnectivityService } from '../common/gateway-connectivity.service';
+import { ProcessorValueHelperService } from '../common/processor-value-helper.service';
 import { INITIAL_CONFIG } from '../smartenit-initial-config';
 
 @NgModule({
@@ -82,7 +83,8 @@ export class SmartenitModule {
                 LocalConnectionService,
                 SyncService,
                 DataQueryService,
-                GatewayConnectivityService
+                GatewayConnectivityService,
+                ProcessorValueHelperService
             ]
         };
     }

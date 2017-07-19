@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { ProcessorValueHelperService } from './processor-value-helper.service';
 import { ActionModel } from '../models/action.model';
 import { ConditionModel } from '../models/condition.model';
 import { EffectModel } from '../models/effect.model';
@@ -8,6 +9,10 @@ import { DeviceModel } from '../models/device.model';
 
 @Injectable()
 export class NaturalLanguageService {
+  constructor(
+    private processorValueHelperService: ProcessorValueHelperService
+  ) { }
+
   private append(desc: string, value: string, connector?: string) {
     if (value.toString().length > 0) {
       let sep = desc.length > 0 ? (connector ? ' ' + connector + ' ' : ' ') : '';
@@ -685,8 +690,9 @@ export class NaturalLanguageService {
 
     let lowerCaseMethod = method.toLowerCase();
 
-    if (lowerCaseMethod.indexOf('on') == 0 || lowerCaseMethod.indexOf('off') == 0) {
-      desc = 'turn ' + method + ' ' + deviceName;
+    if (lowerCaseMethod.indexOf('on') == 0 || lowerCaseMethod.indexOf('off') == 0 ||
+        lowerCaseMethod.indexOf('programon') == 0 || lowerCaseMethod.indexOf('programoff') == 0) {
+      desc = 'turn ' + method.replace('Program', '') + ' ' + deviceName;
     } else if (lowerCaseMethod.indexOf('toggle') == 0) {
       desc = method + ' ' + deviceName;
     } else if (lowerCaseMethod.indexOf('movetolevel') == 0 && value.value != null) {
@@ -1064,6 +1070,8 @@ export class NaturalLanguageService {
 
     if (deviceId) {
       let deviceName = this.getMultipleComponentsName(device, deviceId, processorName, componentId, effect.parents);
+      const valueDesc = this.processorValueHelperService.getValueDescription(device, componentId, processorName, effect.params);
+      deviceName = (valueDesc) ? deviceName.concat(' ', valueDesc) : deviceName;
 
       let method = this.getDeviceMethodFromPath(effect.path);
       let attribute = this.getDeviceAttributeFromPath(effect.path);

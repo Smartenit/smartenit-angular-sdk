@@ -283,4 +283,8 @@ export abstract class SmartenitPlugin {
 
     let subscription: Subscription = observable.subscribe(() => subscription.unsubscribe());
   }
+
+  getValueDescription(value: any): string {
+    return '';
+  }
 }
