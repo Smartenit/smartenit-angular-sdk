@@ -11,7 +11,7 @@ export class ProcessorValueHelperService {
    * @param processorName Name of the processor
    * @param value Current value
    */
-  getValueDescription(device: DeviceModel, componentId: string, processorName: string, value: any): string {
+  getValueDescription(device: DeviceModel | undefined, componentId: string | null, processorName: string | null, value: any): string {
     if (!device || !componentId || !processorName || !value) {
       return '';
     }

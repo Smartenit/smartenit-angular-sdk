@@ -95,20 +95,63 @@ export class OnOffArrayServerPlugin extends SmartenitPlugin {
   }
 
   setZoneName(zoneIndex: number, zoneName: string) {
+    this.executeSetZoneName(zoneIndex, zoneName);
+    this.updateDeviceZoneInfo(zoneIndex, zoneName)
+      .subscribe(() => {
+        this.getZoneName(zoneIndex);
+      });
+  }
+
+  setZoneNames(zonesInfo: Array<{ zoneIndex: number, zoneName: string }>) {
+    const changedZonesInfo = zonesInfo.filter(({ zoneIndex, zoneName }) => {
+      const zone = this.zones.find((z: any) => z.index === zoneIndex);
+      return zone && zone.name !== zoneName;
+    });
+
+    changedZonesInfo.forEach(({ zoneIndex, zoneName }) => {
+      this.executeSetZoneName(zoneIndex, zoneName);
+    });
+    this.updateDeviceZonesInfo(changedZonesInfo)
+      .subscribe(() => {
+        changedZonesInfo.forEach(({ zoneIndex }) => {
+          this.getZoneName(zoneIndex);
+        });
+      });
+  }
+
+  executeSetZoneName(zoneIndex: number, zoneName: string) {
     this.device.executeMethod(this.componentId, this.processorName, 'SetName', {
       ZoneID: zoneIndex + 1,
       ZoneName: zoneName
     });
+  }
 
+  updateDeviceZoneInfo(zoneIndex: number, zoneName: string): Observable<any> {
     if (this.device && (this.device.meta === undefined || this.device.meta === null)) {
       this.device.meta = {};
     }
     this.device.meta.zoneNames = this.zones.map((zone: any) => {
       return (zoneIndex === zone.index) ? zoneName : zone.name;
     });
-    this.device.save().subscribe();
 
-    this.getZoneName(zoneIndex);
+    const existingComponent = this.device.getComponent((zoneIndex + 1).toString());
+    if (existingComponent) {
+      existingComponent.name = zoneName;
+    }
+
+    return this.device.save();
+  }
+
+  updateDeviceZonesInfo(zonesInfo: Array<{ zoneIndex: number, zoneName: string }>): Observable<any> {
+    if (this.device && (this.device.meta === undefined || this.device.meta === null)) {
+      this.device.meta = {};
+    }
+    this.device.meta.zoneNames = this.zones.map((zone: any) => {
+      const zoneInfo = zonesInfo.find(z => z.zoneIndex === zone.index);
+      return (zoneInfo) ? zoneInfo.zoneName : zone.name;
+    });
+
+    return this.device.save();
   }
 
   readMode(delay: boolean = false) {
