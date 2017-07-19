@@ -1,3 +1,5 @@
+import 'paho-mqtt';
+
 // Public classes.
 export { SmartenitModule } from './modules/smartenit.module';
 

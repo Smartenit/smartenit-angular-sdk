@@ -71,7 +71,8 @@
         "uglify-js": "^2.8.29",
         "webpack": "3.0.0",
         "yargs": "^8.0.2",
-        "zone.js": "0.8.12"
+        "zone.js": "0.8.12",
+        "paho-mqtt": "^1.0.3"
     },
     "dependencies": {}
 }
