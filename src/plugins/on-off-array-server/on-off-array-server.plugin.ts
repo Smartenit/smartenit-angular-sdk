@@ -95,20 +95,63 @@ export class OnOffArrayServerPlugin extends SmartenitPlugin {
   }
 
   setZoneName(zoneIndex: number, zoneName: string) {
+    this.executeSetZoneName(zoneIndex, zoneName);
+    this.updateDeviceZoneInfo(zoneIndex, zoneName)
+      .subscribe(() => {
+        this.getZoneName(zoneIndex);
+      });
+  }
+
+  setZoneNames(zonesInfo: Array<{ zoneIndex: number, zoneName: string }>) {
+    const changedZonesInfo = zonesInfo.filter(({ zoneIndex, zoneName }) => {
+      const zone = this.zones.find((z: any) => z.index === zoneIndex);
+      return zone && zone.name !== zoneName;
+    });
+
+    changedZonesInfo.forEach(({ zoneIndex, zoneName }) => {
+      this.executeSetZoneName(zoneIndex, zoneName);
+    });
+    this.updateDeviceZonesInfo(changedZonesInfo)
+      .subscribe(() => {
+        changedZonesInfo.forEach(({ zoneIndex }) => {
+          this.getZoneName(zoneIndex);
+        });
+      });
+  }
+
+  executeSetZoneName(zoneIndex: number, zoneName: string) {
     this.device.executeMethod(this.componentId, this.processorName, 'SetName', {
       ZoneID: zoneIndex + 1,
       ZoneName: zoneName
     });
+  }
 
+  updateDeviceZoneInfo(zoneIndex: number, zoneName: string): Observable<any> {
     if (this.device && (this.device.meta === undefined || this.device.meta === null)) {
       this.device.meta = {};
     }
     this.device.meta.zoneNames = this.zones.map((zone: any) => {
       return (zoneIndex === zone.index) ? zoneName : zone.name;
     });
-    this.device.save().subscribe();
 
-    this.getZoneName(zoneIndex);
+    const existingComponent = this.device.getComponent((zoneIndex + 1).toString());
+    if (existingComponent) {
+      existingComponent.name = zoneName;
+    }
+
+    return this.device.save();
+  }
+
+  updateDeviceZonesInfo(zonesInfo: Array<{ zoneIndex: number, zoneName: string }>): Observable<any> {
+    if (this.device && (this.device.meta === undefined || this.device.meta === null)) {
+      this.device.meta = {};
+    }
+    this.device.meta.zoneNames = this.zones.map((zone: any) => {
+      const zoneInfo = zonesInfo.find(z => z.zoneIndex === zone.index);
+      return (zoneInfo) ? zoneInfo.zoneName : zone.name;
+    });
+
+    return this.device.save();
   }
 
   readMode(delay: boolean = false) {
@@ -1095,11 +1138,14 @@ export class OnOffArrayServerPlugin extends SmartenitPlugin {
     if (attr == 'zones') {
       rsp = this._zones.map((zone: any, index: number) => {
         let name: string = zone.name;
-        if (this.device.meta && this.device.meta.zones && this.device.meta.zones.length >= index) {
-          name = this.device.meta.zones[index].name;
+        if (this.device.meta && this.device.meta.zoneNames && this.device.meta.zoneNames.length >= index) {
+          name = this.device.meta.zoneNames[index];
         }
         return { name: name, value: String(index + 1), payload: { 'ZoneID': index + 1 } };
       });
+      if (this._zonesLen > 0) {
+        rsp = rsp.slice(0, this._zonesLen);
+      }
     } else if (attr == 'programs') {
       rsp = this._programs.map((program: any, index: number) => {
         let name: string = program.name;
@@ -1166,4 +1212,27 @@ export class OnOffArrayServerPlugin extends SmartenitPlugin {
     return null;
   }
 
+  getValueDescription(value: any): string {
+    let description = '';
+
+    if (value.ZoneID) {
+      const zone = this._zones[value.ZoneID - 1];
+      if (zone) {
+        description = zone.name;
+        if (this.device.meta && this.device.meta.zoneNames && this.device.meta.zoneNames.length >= (value.ZoneID - 1)) {
+          description = this.device.meta.zoneNames[(value.ZoneID - 1)];
+        }
+      }
+    } else if (value.ProgramID) {
+      const program = this._programs[value.ProgramID];
+      if (program) {
+        description = program.name;
+        if (this.device.meta && this.device.meta.programs && this.device.meta.programs.length >= value.ProgramID) {
+          description = this.device.meta.programs[value.ProgramID].name;
+        }
+      }
+    }
+
+    return description;
+  }
 }
