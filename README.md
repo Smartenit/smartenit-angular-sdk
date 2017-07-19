@@ -5,7 +5,7 @@
 To install this library, run:
 
 ```bash
-$ npm install smartenit-angular-sdk-angular --save --save-exact
+$ npm install smartenit-angular-sdk --save --save-exact
 ```
 
 ## Using Smartenit Module
