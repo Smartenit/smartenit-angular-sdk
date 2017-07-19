@@ -1,4 +1,4 @@
-# smartenit-sdk-angular2
+# Smartenit Angular SDK
 
 ## Installation
 
