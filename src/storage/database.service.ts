@@ -10,7 +10,6 @@ export class DatabaseService {
 
     constructor() {
         this._instances = {};
-        console.log(LocalForage);
         LocalForage.config({
             name: 'smartenit',
             driver: LocalForage.WEBSQL,

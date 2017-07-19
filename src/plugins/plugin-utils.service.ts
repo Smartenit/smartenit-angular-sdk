@@ -2,9 +2,6 @@ import { Injectable } from "@angular/core";
 
 @Injectable()
 export class PluginUtilsService {
-  constructor() {
-  }
-
   getValueFromPercentage(value: number, lowerLimit: number, upperLimit: number) {
     return Math.round((upperLimit - lowerLimit) * (value / 100));
   }
