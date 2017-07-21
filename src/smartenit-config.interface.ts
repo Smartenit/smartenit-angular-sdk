@@ -8,5 +8,6 @@ export interface ISmartenitConfig {
     offlineMode?: boolean,
     useLocalConnection?: boolean,
     currentAPIVersion?: string,
-    currentGateway?: string
+    currentGateway?: string,
+    useHTTPS?: boolean
 }

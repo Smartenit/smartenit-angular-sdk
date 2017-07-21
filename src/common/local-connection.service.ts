@@ -61,7 +61,9 @@ export class LocalConnectionService {
     let observables: any = [];
 
     domains.forEach((domain: any) => {
-      const path = 'https://' + domain.domain;
+      let path = this.AppConfiguration.useHTTPS ? 'https://' : 'http://';
+      path += domain.domain;
+
       const secondPath = path + ':' + 54443;
       const thirdPath = path + ':' + 54444;
 
