@@ -80,4 +80,12 @@ export class ControllerModel extends Model {
   set value(value: any) {
     this._data.value = value;
   }
+
+  get ownerId(): string {
+    return this._data.ownerId;
+  }
+
+  set ownerId(value: string) {
+    this._data.ownerId = value;
+  }
 }

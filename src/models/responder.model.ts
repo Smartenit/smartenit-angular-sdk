@@ -99,4 +99,12 @@ export class ResponderModel extends Model {
   set params(value: any) {
     this._data.params = value;
   }
+
+  get ownerId(): string {
+    return this._data.ownerId;
+  }
+
+  set ownerId(value: string) {
+    this._data.ownerId = value;
+  }
 }
