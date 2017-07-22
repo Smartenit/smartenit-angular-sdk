@@ -8,6 +8,7 @@ import { Subscription } from "rxjs/Subscription";
 
 export class SceneModel extends Model {
   private _onSceneData: Subject<any>;
+  private _ownerId: string;
 
   activate() {
     this.scenesService.post(this._id + '/activate').subscribe(() => { });
@@ -27,6 +28,14 @@ export class SceneModel extends Model {
 
   get onSceneData(): Observable<any> {
     return this._onSceneData.asObservable();
+  }
+
+  get ownerId(): string {
+    return this._ownerId;
+  }
+
+  set ownerId(value: string) {
+    this._ownerId = value;
   }
 
   constructor(
