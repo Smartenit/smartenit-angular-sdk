@@ -126,7 +126,7 @@ export class AuthService {
         this.storage.set({ key: 'ATR', value: Date.now() });
         this.storage.set({ key: 'ATL', value: ttl });
 
-        return this.storage.set({ key: 'AT', value: accessToken, ttl: ttl });
+        return this.storage.set({ key: 'AT', value: accessToken });
     }
 
     setRefreshToken(refreshToken: string) {
