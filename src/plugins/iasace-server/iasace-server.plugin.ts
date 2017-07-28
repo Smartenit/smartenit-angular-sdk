@@ -11,7 +11,6 @@ export class IASACEServerPlugin extends SmartenitPlugin implements IIASACEServer
 
   onInit() {
     this.getCachedValues();
-    this.getStatus();
   }
 
   /*
