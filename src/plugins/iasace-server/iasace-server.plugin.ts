@@ -236,7 +236,9 @@ export class IASACEServerPlugin extends SmartenitPlugin implements IIASACEServer
       //this.executeMethod(this.componentId, this.processorName, 'GetBypassedZoneList', {});
 
     } else if (attributeOrMethod === 'ZoneMap') {
-      this.parseZoneMap(response.value);
+      this.devicesService.list().subscribe((devices: any) => {
+        this.parseZoneMap(response.value, devices && devices.data || []);
+      });
 
     }
 
@@ -269,7 +271,7 @@ export class IASACEServerPlugin extends SmartenitPlugin implements IIASACEServer
     return true;
   }
 
-  parseZoneMap(response: any) {
+  parseZoneMap(response: any, devices: any) {
     let zonesMap: any = [];
     Object.keys(response).sort().forEach(key => {
       zonesMap.push(response[key]);
@@ -289,7 +291,9 @@ export class IASACEServerPlugin extends SmartenitPlugin implements IIASACEServer
       };
 
       let currentZone: any = this._zones.find((oldZone: any) => {
-        return oldZone.deviceId && oldZone.zoneId == zoneMap.zoneId && oldZone.hwId == zoneMap.hwId;
+        return oldZone.deviceId && devices.some((d: any) => d._id === oldZone.deviceId) &&
+          oldZone.zoneId == zoneMap.zoneId &&
+          oldZone.hwId == zoneMap.hwId;
       });
 
       requestDevices = requestDevices || (currentZone ? false : true);
