@@ -1,4 +1,4 @@
 export interface IListValue {
-  getSelectedValues(): any[];
-  selectValue(option: any, subscribe?: boolean): any;
+  getSelectedValues(context?: string): any[];
+  selectValue(option: any, subscribe?: boolean, context?: string): any;
 }
