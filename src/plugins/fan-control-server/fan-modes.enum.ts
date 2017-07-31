@@ -1,4 +1,4 @@
-export enum ThermostatFanModes {
+export enum FanModes {
   OFF = 0,
   LOW = 1,
   MEDIUM = 2,

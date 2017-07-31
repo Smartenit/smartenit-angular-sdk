@@ -1,7 +1,6 @@
 import { SmartenitPlugin } from "../smartenit-plugin";
 import { IWebSocketDeviceMessage } from "../../websockets/websocket-device-message.interface";
 import { ThermostatModes } from "./thermostat-modes.enum";
-import { ThermostatFanModes } from "./thermostat-fan-modes.enum";
 import { INumericValue } from "../../interfaces/numeric-value.interface";
 import { Observable } from "rxjs/Observable";
 import "rxjs/add/operator/mergeMap";
@@ -12,12 +11,10 @@ import { IListValue } from "../../interfaces/list-value.interface";
 const INIT_COOLING: number = 10;
 const INIT_HEATING: number = 20;
 const INIT_MODE: number = ThermostatModes.AUTO;
-const INIT_FAN_MODE: number = ThermostatFanModes.AUTO;
 const CACHE_TIME: number = 3600;
 
 export class ThermostatServerPlugin extends SmartenitPlugin implements INumericValue, ITextValue, IListValue {
   private _mode: any;
-  private _fanMode: any;
   private _temperature: number;
   private _desiredCoolingTemperature: number;
   private _desiredHeatingTemperature: number;
@@ -28,19 +25,12 @@ export class ThermostatServerPlugin extends SmartenitPlugin implements INumericV
     return this.setAttributeWithSubscribeOption(this.componentId, this.processorName, 'SystemMode', { value: mode }, subscribe || false);
   }
 
-  setFanMode(mode: ThermostatFanModes, subscribe?: boolean): any {
-    this._fanMode = mode;
-
-    return this.setAttributeWithSubscribeOption(this.componentId, this.processorName, 'FanMode', { value: mode }, subscribe || false);
-  }
-
   getValue(attribute?: string): number {
     let value: any = null;
     switch (attribute) {
       case 'OccupiedCoolingSetpoint': value = this._desiredCoolingTemperature; break;
       case 'OccupiedHeatingSetpoint': value = this._desiredHeatingTemperature; break;
       case 'SystemMode': value = this._mode; break;
-      case 'FanMode': value = this._fanMode; break;
     }
 
     return value;
@@ -156,22 +146,15 @@ export class ThermostatServerPlugin extends SmartenitPlugin implements INumericV
     }
   }
 
-  getSelectedValues(context?: string): any[] {
-    return (!context || context === 'SystemMode') ? [this._mode] : [this._fanMode];
+  getSelectedValues(): any[] {
+    return [this._mode];
   }
 
-  selectValue(option: any, subscribe?: boolean, context?: string): any {
-    if (!context || context === 'SystemMode') {
-      this._mode = option;
-      this._onUpdate.next({ mode: this._mode });
+  selectValue(option: any, subscribe?: boolean): any {
+    this._mode = option;
+    this._onUpdate.next({ mode: this._mode });
 
-      return this.setMode(option, subscribe);
-    } else {
-      this._fanMode = option;
-      this._onUpdate.next({ FanMode: this._fanMode });
-
-      return this.setFanMode(option, subscribe);
-    }
+    return this.setMode(option, subscribe);
   }
 
   getCachedValues(subscribe?: boolean): any {
@@ -179,7 +162,6 @@ export class ThermostatServerPlugin extends SmartenitPlugin implements INumericV
       this.getCache('OccupiedCoolingSetpoint'),
       this.getCache('OccupiedHeatingSetpoint'),
       this.getCache('SystemMode'),
-      this.getCache('FanMode'),
       this.getCache()
     ];
 
@@ -197,11 +179,7 @@ export class ThermostatServerPlugin extends SmartenitPlugin implements INumericV
       }
 
       if (array && array[3] != null) {
-        this._fanMode = array[3];
-      }
-
-      if (array && array[4] != null) {
-        this._temperature = array[4];
+        this._temperature = array[3];
       }
 
       if (this._temperature != null) {
@@ -210,7 +188,6 @@ export class ThermostatServerPlugin extends SmartenitPlugin implements INumericV
 
       this._onUpdate.next({
         SystemMode: this._mode,
-        FanMode: this._fanMode,
         OccupiedHeatingSetpoint: this._desiredHeatingTemperature,
         OccupiedCoolingSetpoint: this._desiredCoolingTemperature,
         temperature: this._temperature
@@ -248,14 +225,6 @@ export class ThermostatServerPlugin extends SmartenitPlugin implements INumericV
       this.setCache('SystemMode', this._mode, CACHE_TIME);
 
       this._onUpdate.next({ SystemMode: this._mode });
-    } else if (attribute === 'FanMode') {
-      const response = message && message.data && message.data.response;
-
-      this._fanMode = parseInt(response.value);
-
-      this.setCache('FanMode', this._fanMode, CACHE_TIME);
-
-      this._onUpdate.next({ FanMode: this._fanMode });
     } else if (attribute === 'OccupiedCoolingSetpoint') {
       const response = message && message.data && message.data.response;
 
