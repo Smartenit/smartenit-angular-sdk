@@ -19,6 +19,7 @@ export class DeviceModel extends Model {
   private _onlineTimeout: any;
   private _ownerId: string;
   private _parents: any;
+  private _state: string;
 
   private static _requests: any = {};
   private static _totalRequestCount: number = 0;
@@ -135,6 +136,7 @@ export class DeviceModel extends Model {
       deviceInstance._model = data.config && data.config.model ? data.config.model : null;
       deviceInstance._ownerId = data.ownerId;
       deviceInstance._parents = data.parents;
+      deviceInstance._state = data.state;
 
       this.deviceSocketSubscription = deviceInstance.webSocketsService.onDeviceMessage
         .subscribe((message: IWebSocketDeviceMessage) => {
@@ -212,6 +214,9 @@ export class DeviceModel extends Model {
   }
 
   private drainQueue() {
+    if (!this.isReady())
+      return;
+
     if (this._deviceRequests) {
       const keys = Object.keys(this._deviceRequests)
 
@@ -236,6 +241,9 @@ export class DeviceModel extends Model {
   }
 
   private drainRequest(request: Observable<any>, key: any) {
+    if (!this.isReady())
+      return;
+
     request.subscribe((response: any) => {
       this._onDeviceResponse.next({ response, key });
     });
@@ -274,6 +282,9 @@ export class DeviceModel extends Model {
   }
 
   getAttribute(componentId: string, processorName: string, attribute: string, payload?: any, query?: string): Observable<any> {
+    if (!this.isReady())
+      return Observable.empty();
+
     this.startOfflineTimeout();
 
     let path = [this._id, 'comps', componentId, 'procs', processorName, 'attrs', attribute].join('/');
@@ -290,6 +301,9 @@ export class DeviceModel extends Model {
   }
 
   setAttribute(componentId: string, processorName: string, attribute: string, value: any, readAttribute?: boolean): Observable<any> {
+    if (!this.isReady())
+      return Observable.empty();
+
     this.startOfflineTimeout();
 
     const path = [this._id, 'comps', componentId, 'procs', processorName, 'attrs', attribute].join('/');
@@ -338,6 +352,10 @@ export class DeviceModel extends Model {
   isChildrenOf(id: string, hwId: string) {
     return this._ownerId === hwId ||
       (this._parents && this._parents.devices && this._parents.devices.some((p: any) => p.id === id));
+  }
+
+  isReady() {
+    return this._state === 'ready';
   }
 
   startOfflineTimeout() {
