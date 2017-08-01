@@ -355,7 +355,7 @@ export class DeviceModel extends Model {
   }
 
   isReady() {
-    return this._state === 'ready';
+    return this._state.toLowerCase() === 'ready';
   }
 
   startOfflineTimeout() {
