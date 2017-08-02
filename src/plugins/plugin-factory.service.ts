@@ -19,6 +19,7 @@ import { NotificationServerPlugin } from "./notification-server/notification-ser
 import { PowerConfigurationServerPlugin } from "./power-configuration-server/power-configuration-server.plugin";
 import { TemperatureMeasurementServerPlugin } from "./temperature-measurement-server/temperature-measurement-server.plugin";
 import { RelativeHumidityMeasurementServerPlugin } from "./relative-humidity-measurement-server/relative-humidity-measurement-server.plugin";
+import { FanControlServerPlugin } from "./fan-control-server/fan-control-server.plugin";
 import { DeviceModel } from "../models/device.model";
 import { ActionsService } from "../resources/actions.service";
 import { EffectsService } from "../resources/effects.service";
@@ -44,7 +45,8 @@ const plugins: any = {
   'IASWDServerPlugin': IASWDServerPlugin,
   'IASACEServerPlugin': IASACEServerPlugin,
   'IASWDClientPlugin': IASWDClientPlugin,
-  'NotificationServerPlugin': NotificationServerPlugin
+  'NotificationServerPlugin': NotificationServerPlugin,
+  'FanControlServerPlugin': FanControlServerPlugin
 };
 
 @Injectable()

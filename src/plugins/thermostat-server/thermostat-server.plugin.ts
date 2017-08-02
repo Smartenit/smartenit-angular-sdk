@@ -152,7 +152,6 @@ export class ThermostatServerPlugin extends SmartenitPlugin implements INumericV
 
   selectValue(option: any, subscribe?: boolean): any {
     this._mode = option;
-
     this._onUpdate.next({ mode: this._mode });
 
     return this.setMode(option, subscribe);
