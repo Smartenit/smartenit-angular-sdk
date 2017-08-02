@@ -8,6 +8,7 @@ import { IWebSocketDeviceMessage } from "../websockets/websocket-device-message.
 import { PluginFactoryService } from "../plugins/plugin-factory.service";
 import { SmartenitPlugin } from "../plugins/smartenit-plugin";
 import { Model } from "../common/model";
+import { DeviceState } from "./device-state.enum";
 
 export class DeviceModel extends Model {
   private _plugins: any;
@@ -355,7 +356,7 @@ export class DeviceModel extends Model {
   }
 
   isReady() {
-    return this._state && this._state.toLowerCase() === 'ready';
+    return this._state && (<any>DeviceState)[this._state.toUpperCase()] === DeviceState.READY;
   }
 
   startOfflineTimeout() {
