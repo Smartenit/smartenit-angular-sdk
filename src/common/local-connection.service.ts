@@ -52,12 +52,12 @@ export class LocalConnectionService {
     }, 10 * 60 * 1000)
   }
 
-  private testConnection(path: string, pingUrl: string, domain: string): Observable<any> {
+  private testConnection(path: string, pingUrl: string, domain: string, onError?: Observable<any>): Observable<any> {
     return this.http.get(path + pingUrl)
       .timeout(2000)
       .map(response => Observable.of({ url: path, domain: domain, response: response }))
       .catch(() => {
-        return Observable.of({ error: true });
+        return onError ? onError : Observable.of({ error: true });
       });
   }
 
@@ -73,11 +73,9 @@ export class LocalConnectionService {
 
       const secondPath = path + ':' + 54444;
 
-      return [
-        this.testConnection(path, pingUrl, domain),
-        this.testConnection(secondPath, pingUrl, domain)
-      ]
-    }).reduce((x: Array<any>, y: any) => x.concat(y), []);
+      return this.testConnection(path, pingUrl, domain,
+        this.testConnection(secondPath, pingUrl, domain));
+    });
 
     let anyConnectionAssigned = false;
 
