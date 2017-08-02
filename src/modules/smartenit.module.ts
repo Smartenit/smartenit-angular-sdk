@@ -9,6 +9,7 @@ import { Oauth2Service } from '../resources/oauth-2.service';
 import { ResourcesProvider } from '../resources/resources.provider';
 import { WebSocketsService } from '../websockets/websockets.service';
 import { AreasService } from '../resources/areas.service';
+import { AccountsService } from '../resources/accounts.service';
 import { StorageService } from '../storage/storage.service';
 import { DatabaseService } from '../storage/database.service';
 import { UsersService } from '../resources/users.service';
@@ -63,6 +64,7 @@ export class SmartenitModule {
                 ResourcesProvider,
                 WebSocketsService,
                 AreasService,
+                AccountsService,
                 StorageService,
                 DatabaseService,
                 UsersService,
@@ -101,6 +103,7 @@ export class SmartenitModule {
                 ResourcesProvider,
                 WebSocketsService,
                 AreasService,
+                AccountsService,
                 StorageService,
                 DatabaseService,
                 UsersService,
@@ -137,6 +140,7 @@ export class SmartenitModule {
                 ResourcesProvider,
                 WebSocketsService,
                 AreasService,
+                AccountsService,
                 StorageService,
                 DatabaseService,
                 UsersService,
