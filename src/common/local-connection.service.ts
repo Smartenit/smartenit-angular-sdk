@@ -67,17 +67,6 @@ export class LocalConnectionService {
     const pingUrl = this.apiVersionUrl + '/ping';
     const localGateways = this.database.getCollection('local_gateways');
 
-    domains.sort((d1: any, d2: any) => {
-      if (!d1.lastUse && !d2.lastUse) {
-        return 0;
-      } else if (!d1.lastUse) {
-        return 1;
-      } else if (!d2.lastUse) {
-        return -1;
-      } else {
-        return (new Date(d2.lastUse).getTime()) - (new Date(d1.lastUse).getTime());
-      }
-    });
     let observables: any = domains
       .map((domain: any) => {
         let path = this.AppConfiguration.useHTTPS ? 'https://' : 'http://';
@@ -135,9 +124,7 @@ export class LocalConnectionService {
             } else {
               if (workingRequest && workingRequest.value && workingRequest.value.url) {
                 const url = workingRequest.value.url;
-                localGateways.save(workingRequest.value.domain.domain, Object.assign({}, workingRequest.value.domain, {
-                  lastUse: new Date().toISOString()
-                })).subscribe();
+                localGateways.save(workingRequest.value.domain.domain, workingRequest.value.domain).subscribe();
 
                 if (assignConnection && this.AppConfiguration.currentConfig.useLocalConnection && !this.usingLocalConnection) {
                   anyConnectionAssigned = true;
@@ -219,15 +206,9 @@ export class LocalConnectionService {
       });
 
       if (domains.length > 0) {
-        localGateways.list().subscribe((urls: any) => {
-          urls.filter((u: any) => !domains.some((d: any) => d.domain === u.key))
-            .forEach((u: any) => localGateways.removeById(u.key).subscribe());
-          domains.forEach((element: any) => {
-            const existing = urls.find((u: any) => u.key === element.domain);
-            localGateways.save(element.domain, existing
-                ? Object.assign({}, existing.value || {}, element)
-                : element).subscribe();
-          });
+        localGateways.clear();
+        domains.forEach((element: any) => {
+          localGateways.save(element.domain, element).subscribe();
         });
       }
 
