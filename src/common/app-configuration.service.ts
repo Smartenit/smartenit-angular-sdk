@@ -40,7 +40,7 @@ export class AppConfigurationService {
     }
 
     public get useHTTPS(): boolean {
-        return this._currentConfig.useHTTPS || true;
+        return this._currentConfig.useHTTPS != null ? this._currentConfig.useHTTPS : true;
     }
 
     public get currentAPIURL(): string {

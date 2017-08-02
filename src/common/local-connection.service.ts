@@ -52,39 +52,32 @@ export class LocalConnectionService {
     }, 10 * 60 * 1000)
   }
 
+  private testConnection(path: string, pingUrl: string, domain: string): Observable<any> {
+    return this.http.get(path + pingUrl)
+      .timeout(2000)
+      .map(response => Observable.of({ url: path, domain: domain, response: response }))
+      .catch(() => {
+        return Observable.of({ error: true });
+      });
+  }
+
   private testConnections(domains: any, assignConnection = true, refreshToken = true) {
     let requests = [];
 
     const pingUrl = this.apiVersionUrl + '/ping';
     const localGateways = this.database.getCollection('local_gateways');
 
-    let observables: any = [];
-
-    domains.forEach((domain: any) => {
+    let observables: any = domains.map((domain: any) => {
       let path = this.AppConfiguration.useHTTPS ? 'https://' : 'http://';
       path += domain.domain;
 
-      const secondPath = path + ':' + 54443;
-      const thirdPath = path + ':' + 54444;
+      const secondPath = path + ':' + 54444;
 
-      observables.push(this.http.get(path + pingUrl)
-        .timeout(2000)
-        .map(response => Observable.of({ url: path, domain: domain, response: response }))
-        .catch(() => {
-          return this.http.get(secondPath + pingUrl)
-            .timeout(2000)
-            .map(response => Observable.of({ url: secondPath, domain: domain, response: response }))
-            .catch(() => {
-              return this.http.get(thirdPath + pingUrl)
-                .timeout(2000)
-                .map(response => Observable.of({ url: thirdPath, domain: domain, response: response }))
-                .catch(() => {
-                  return Observable.of({ error: true });
-                })
-            })
-        })
-      );
-    });
+      return [
+        this.testConnection(path, pingUrl, domain),
+        this.testConnection(secondPath, pingUrl, domain)
+      ]
+    }).reduce((x: Array<any>, y: any) => x.concat(y), []);
 
     let anyConnectionAssigned = false;
 
