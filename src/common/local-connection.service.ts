@@ -219,9 +219,15 @@ export class LocalConnectionService {
       });
 
       if (domains.length > 0) {
-        localGateways.clear();
-        domains.forEach((element: any) => {
-          localGateways.save(element.domain, element).subscribe();
+        localGateways.list().subscribe((urls: any) => {
+          urls.filter((u: any) => !domains.some((d: any) => d.domain === u.key))
+            .forEach((u: any) => localGateways.removeById(u.key).subscribe());
+          domains.forEach((element: any) => {
+            const existing = urls.find((u: any) => u.key === element.domain);
+            localGateways.save(element.domain, existing
+                ? Object.assign({}, existing.value || {}, element)
+                : element).subscribe();
+          });
         });
       }
 
