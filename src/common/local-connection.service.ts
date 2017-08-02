@@ -67,15 +67,27 @@ export class LocalConnectionService {
     const pingUrl = this.apiVersionUrl + '/ping';
     const localGateways = this.database.getCollection('local_gateways');
 
-    let observables: any = domains.map((domain: any) => {
-      let path = this.AppConfiguration.useHTTPS ? 'https://' : 'http://';
-      path += domain.domain;
-
-      const secondPath = path + ':' + 54444;
-
-      return this.testConnection(path, pingUrl, domain,
-        this.testConnection(secondPath, pingUrl, domain));
+    domains.sort((d1: any, d2: any) => {
+      if (!d1.lastUse && !d2.lastUse) {
+        return 0;
+      } else if (!d1.lastUse) {
+        return 1;
+      } else if (!d2.lastUse) {
+        return -1;
+      } else {
+        return (new Date(d2.lastUse).getTime()) - (new Date(d1.lastUse).getTime());
+      }
     });
+    let observables: any = domains
+      .map((domain: any) => {
+        let path = this.AppConfiguration.useHTTPS ? 'https://' : 'http://';
+        path += domain.domain;
+
+        const secondPath = path + ':' + 54444;
+
+        return this.testConnection(path, pingUrl, domain,
+          this.testConnection(secondPath, pingUrl, domain));
+      });
 
     let anyConnectionAssigned = false;
 
@@ -123,7 +135,9 @@ export class LocalConnectionService {
             } else {
               if (workingRequest && workingRequest.value && workingRequest.value.url) {
                 const url = workingRequest.value.url;
-                localGateways.save(workingRequest.value.domain.domain, workingRequest.value.domain).subscribe();
+                localGateways.save(workingRequest.value.domain.domain, Object.assign({}, workingRequest.value.domain, {
+                  lastUse: new Date().toISOString()
+                })).subscribe();
 
                 if (assignConnection && this.AppConfiguration.currentConfig.useLocalConnection && !this.usingLocalConnection) {
                   anyConnectionAssigned = true;
