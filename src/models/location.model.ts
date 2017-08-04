@@ -3,11 +3,11 @@ import { LocationsService } from "../resources/locations.service";
 
 export class LocationModel extends Model {
   get settings(): any {
-    return this._data.expr;
+    return this._data.settings;
   }
 
   set settings(value: any) {
-    this._data.expr = value;
+    this._data.settings = value;
   }
 
   constructor(
