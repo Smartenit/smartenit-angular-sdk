@@ -13,7 +13,8 @@ export class EventsManagerService {
     '_onUserSignOut': new Subject(),
     '_onUserSignIn': new Subject(),
     '_onConnectionSetup': new Subject(),
-    '_onConnectivityRecovered': new Subject()
+    '_onConnectivityRecovered': new Subject(),
+    '_onRestoreNetworkStatus': new Subject()
   }
 
   public static ON_SERVER_CONNECTIVITY_ERROR: string = '_onServerConnectivityError';
@@ -24,6 +25,7 @@ export class EventsManagerService {
   public static ON_USER_SIGN_IN: string = '_onUserSignIn';
   public static ON_CONNECTION_SETUP: string = '_onConnectionSetup';
   public static ON_CONNECTIVITY_RECOVERED: string = '_onConnectivityRecovered';
+  public static ON_RESTORE_NETWORK_STATUS: string = '_onRestoreNetworkStatus';
 
   public get onServerConnectivityError(): Observable<any> {
     return this.events['_onServerConnectivityError'].asObservable();
@@ -55,6 +57,10 @@ export class EventsManagerService {
 
   public get onTokenRefreshError(): Observable<any> {
     return this.events['_onTokenRefreshError'].asObservable();
+  }
+
+  public get onRestoreNetworkStatus(): Observable<any> {
+    return this.events['_onRestoreNetworkStatus'].asObservable();
   }
 
   trigger(event: string, data?: any) {

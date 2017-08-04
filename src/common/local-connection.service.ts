@@ -15,6 +15,7 @@ import { AppConfigurationService } from "../common/app-configuration.service";
 import { DevicesService } from "../resources/devices.service";
 import { DatabaseCollection } from "../storage/database-collection";
 import { DatabaseService } from "../storage/database.service";
+import { StorageService } from "../storage/storage.service";
 import { APIClientService } from "../common/api-client.service";
 import { EventsManagerService } from "../common/events-manager.service";
 import { HttpInterceptor } from "../common/http-interceptor.service";
@@ -32,7 +33,8 @@ export class LocalConnectionService {
     public devicesService: DevicesService,
     public database: DatabaseService,
     public eventsService: EventsManagerService,
-    public AppConfiguration: AppConfigurationService
+    public AppConfiguration: AppConfigurationService,
+    private storage: StorageService
   ) {
     this.eventsService.onServerConnectivityError.subscribe(({ enqueueRequests }) => {
       if (enqueueRequests && !this.switchingConnection) {
@@ -52,39 +54,31 @@ export class LocalConnectionService {
     }, 10 * 60 * 1000)
   }
 
+  private testConnection(path: string, pingUrl: string, domain: string, onError?: Observable<any>): Observable<any> {
+    return this.http.get(path + pingUrl)
+      .timeout(2000)
+      .map(response => Observable.of({ url: path, domain: domain, response: response }))
+      .catch(() => {
+        return onError ? onError : Observable.of({ error: true });
+      });
+  }
+
   private testConnections(domains: any, assignConnection = true, refreshToken = true) {
     let requests = [];
 
     const pingUrl = this.apiVersionUrl + '/ping';
     const localGateways = this.database.getCollection('local_gateways');
 
-    let observables: any = [];
+    let observables: any = domains
+      .map((domain: any) => {
+        let path = this.AppConfiguration.useHTTPS ? 'https://' : 'http://';
+        path += domain.domain;
 
-    domains.forEach((domain: any) => {
-      let path = this.AppConfiguration.useHTTPS ? 'https://' : 'http://';
-      path += domain.domain;
+        const secondPath = path + ':' + 54444;
 
-      const secondPath = path + ':' + 54443;
-      const thirdPath = path + ':' + 54444;
-
-      observables.push(this.http.get(path + pingUrl)
-        .timeout(2000)
-        .map(response => Observable.of({ url: path, domain: domain, response: response }))
-        .catch(() => {
-          return this.http.get(secondPath + pingUrl)
-            .timeout(2000)
-            .map(response => Observable.of({ url: secondPath, domain: domain, response: response }))
-            .catch(() => {
-              return this.http.get(thirdPath + pingUrl)
-                .timeout(2000)
-                .map(response => Observable.of({ url: thirdPath, domain: domain, response: response }))
-                .catch(() => {
-                  return Observable.of({ error: true });
-                })
-            })
-        })
-      );
-    });
+        return this.testConnection(path, pingUrl, domain,
+          this.testConnection(secondPath, pingUrl, domain));
+      });
 
     let anyConnectionAssigned = false;
 
@@ -143,30 +137,28 @@ export class LocalConnectionService {
           }
         }
       }, (error) => {
-        if (assignConnection && !anyConnectionAssigned) {
-          console.log('Local address not available, using remote API');
-          this.switchingConnection = false;
-          this.AppConfiguration.restoreInitialConfiguration();
-          if (refreshToken) {
-            this.authService.getNewAccessTokenFromRefreshToken();
-          }
-          this.eventsService.trigger(EventsManagerService.ON_CONNECTION_SETUP);
-        }
+        this.useRemoteAPI(assignConnection, anyConnectionAssigned, refreshToken);
       }, () => {
-        if (assignConnection && !anyConnectionAssigned) {
-          console.log('Local address not available, using remote API');
-          this.switchingConnection = false;
-          this.AppConfiguration.restoreInitialConfiguration();
-          if (refreshToken) {
-            this.authService.getNewAccessTokenFromRefreshToken();
-          }
-          this.eventsService.trigger(EventsManagerService.ON_CONNECTION_SETUP);
-        }
+        this.useRemoteAPI(assignConnection, anyConnectionAssigned, refreshToken);
 
         if (subscription) {
           subscription.unsubscribe();
         }
       });
+  }
+
+  private useRemoteAPI(assignConnection: boolean, anyConnectionAssigned: boolean, refreshToken: boolean) {
+    if (assignConnection && !anyConnectionAssigned) {
+      console.log('Local address not available, using remote API');
+      this.switchingConnection = false;
+      const currentAPIUrl = this.storage.get('URL') || this.AppConfiguration.currentAPIURL;
+      this.AppConfiguration.restoreInitialConfiguration();
+      const newAPIUrl = this.AppConfiguration.currentAPIURL;
+      if (refreshToken) {
+        this.authService.getNewAccessTokenFromRefreshToken(currentAPIUrl === newAPIUrl);
+      }
+      this.eventsService.trigger(EventsManagerService.ON_CONNECTION_SETUP);
+    }
   }
 
   checkRemoteConnections(assignRemoteConnection = true, testConnections = true, refreshToken = true) {
@@ -235,7 +227,9 @@ export class LocalConnectionService {
     this.switchingConnection = false;
 
     this.AppConfiguration.setCurrentGateway(gateway);
+    const currentAPIUrl = this.storage.get('URL') || this.AppConfiguration.currentAPIURL;
     this.AppConfiguration.setAPIURL(url);
+    const newAPIUrl = this.AppConfiguration.currentAPIURL;
     this.startLocalConnectionTimer();
 
     if (this.authService.isLoggedIn()) {
@@ -244,8 +238,13 @@ export class LocalConnectionService {
         subscription.unsubscribe();
       });
 
+      let networkSubscription = this.eventsService.onRestoreNetworkStatus.subscribe(() => {
+        this.eventsService.trigger(EventsManagerService.ON_CONNECTION_SETUP, url);
+        networkSubscription.unsubscribe();
+      });
+
       if (refreshToken) {
-        this.authService.getNewAccessTokenFromRefreshToken();
+        this.authService.getNewAccessTokenFromRefreshToken(currentAPIUrl === newAPIUrl);
       }
     } else {
       this.eventsService.trigger(EventsManagerService.ON_CONNECTION_SETUP, url);
