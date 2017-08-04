@@ -135,30 +135,28 @@ export class LocalConnectionService {
           }
         }
       }, (error) => {
-        if (assignConnection && !anyConnectionAssigned) {
-          console.log('Local address not available, using remote API');
-          this.switchingConnection = false;
-          this.AppConfiguration.restoreInitialConfiguration();
-          if (refreshToken) {
-            this.authService.getNewAccessTokenFromRefreshToken();
-          }
-          this.eventsService.trigger(EventsManagerService.ON_CONNECTION_SETUP);
-        }
+        this.useRemoteAPI(assignConnection, anyConnectionAssigned, refreshToken);
       }, () => {
-        if (assignConnection && !anyConnectionAssigned) {
-          console.log('Local address not available, using remote API');
-          this.switchingConnection = false;
-          this.AppConfiguration.restoreInitialConfiguration();
-          if (refreshToken) {
-            this.authService.getNewAccessTokenFromRefreshToken();
-          }
-          this.eventsService.trigger(EventsManagerService.ON_CONNECTION_SETUP);
-        }
+        this.useRemoteAPI(assignConnection, anyConnectionAssigned, refreshToken);
 
         if (subscription) {
           subscription.unsubscribe();
         }
       });
+  }
+
+  private useRemoteAPI(assignConnection: boolean, anyConnectionAssigned: boolean, refreshToken: boolean) {
+    if (assignConnection && !anyConnectionAssigned) {
+      console.log('Local address not available, using remote API');
+      this.switchingConnection = false;
+      const currentAPIUrl = this.AppConfiguration.currentAPIURL;
+      this.AppConfiguration.restoreInitialConfiguration();
+      const newAPIUrl = this.AppConfiguration.currentAPIURL;
+      if (refreshToken) {
+        this.authService.getNewAccessTokenFromRefreshToken(currentAPIUrl === newAPIUrl);
+      }
+      this.eventsService.trigger(EventsManagerService.ON_CONNECTION_SETUP);
+    }
   }
 
   checkRemoteConnections(assignRemoteConnection = true, testConnections = true, refreshToken = true) {
@@ -227,7 +225,9 @@ export class LocalConnectionService {
     this.switchingConnection = false;
 
     this.AppConfiguration.setCurrentGateway(gateway);
+    const currentAPIUrl = this.AppConfiguration.currentAPIURL;
     this.AppConfiguration.setAPIURL(url);
+    const newAPIUrl = this.AppConfiguration.currentAPIURL;
     this.startLocalConnectionTimer();
 
     if (this.authService.isLoggedIn()) {
@@ -237,7 +237,7 @@ export class LocalConnectionService {
       });
 
       if (refreshToken) {
-        this.authService.getNewAccessTokenFromRefreshToken();
+        this.authService.getNewAccessTokenFromRefreshToken(currentAPIUrl === newAPIUrl);
       }
     } else {
       this.eventsService.trigger(EventsManagerService.ON_CONNECTION_SETUP, url);
