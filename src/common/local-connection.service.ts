@@ -15,6 +15,7 @@ import { AppConfigurationService } from "../common/app-configuration.service";
 import { DevicesService } from "../resources/devices.service";
 import { DatabaseCollection } from "../storage/database-collection";
 import { DatabaseService } from "../storage/database.service";
+import { StorageService } from "../storage/storage.service";
 import { APIClientService } from "../common/api-client.service";
 import { EventsManagerService } from "../common/events-manager.service";
 import { HttpInterceptor } from "../common/http-interceptor.service";
@@ -32,7 +33,8 @@ export class LocalConnectionService {
     public devicesService: DevicesService,
     public database: DatabaseService,
     public eventsService: EventsManagerService,
-    public AppConfiguration: AppConfigurationService
+    public AppConfiguration: AppConfigurationService,
+    private storage: StorageService
   ) {
     this.eventsService.onServerConnectivityError.subscribe(({ enqueueRequests }) => {
       if (enqueueRequests && !this.switchingConnection) {
@@ -149,7 +151,7 @@ export class LocalConnectionService {
     if (assignConnection && !anyConnectionAssigned) {
       console.log('Local address not available, using remote API');
       this.switchingConnection = false;
-      const currentAPIUrl = this.AppConfiguration.currentAPIURL;
+      const currentAPIUrl = this.storage.get('URL') || this.AppConfiguration.currentAPIURL;
       this.AppConfiguration.restoreInitialConfiguration();
       const newAPIUrl = this.AppConfiguration.currentAPIURL;
       if (refreshToken) {
@@ -225,7 +227,7 @@ export class LocalConnectionService {
     this.switchingConnection = false;
 
     this.AppConfiguration.setCurrentGateway(gateway);
-    const currentAPIUrl = this.AppConfiguration.currentAPIURL;
+    const currentAPIUrl = this.storage.get('URL') || this.AppConfiguration.currentAPIURL;
     this.AppConfiguration.setAPIURL(url);
     const newAPIUrl = this.AppConfiguration.currentAPIURL;
     this.startLocalConnectionTimer();
@@ -234,6 +236,11 @@ export class LocalConnectionService {
       let subscription = this.eventsService.onTokenRefreshed.subscribe(() => {
         this.eventsService.trigger(EventsManagerService.ON_CONNECTION_SETUP, url);
         subscription.unsubscribe();
+      });
+
+      let networkSubscription = this.eventsService.onRestoreNetworkStatus.subscribe(() => {
+        this.eventsService.trigger(EventsManagerService.ON_CONNECTION_SETUP, url);
+        networkSubscription.unsubscribe();
       });
 
       if (refreshToken) {

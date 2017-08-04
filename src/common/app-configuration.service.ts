@@ -3,6 +3,7 @@ import { ISmartenitConfig } from "../smartenit-config.interface";
 import { Observable } from "rxjs/Observable";
 import { Subject } from "rxjs/Subject";
 import { INITIAL_CONFIG } from "../smartenit-initial-config";
+import { StorageService } from '../storage/storage.service';
 
 export const BACKEND_DATA_LIMIT = 25;
 
@@ -13,7 +14,10 @@ export class AppConfigurationService {
     private _onConfigChange: Subject<any> = new Subject<any>();
     private initialAPIUrl: string;
 
-    constructor( @Inject(INITIAL_CONFIG) config: ISmartenitConfig) {
+    constructor(
+        @Inject(INITIAL_CONFIG) config: ISmartenitConfig,
+        private storage: StorageService
+    ) {
         this.initialConfig = config;
     }
 
@@ -57,6 +61,7 @@ export class AppConfigurationService {
 
     public setAPIURL(apiURL: string) {
         console.log('API URL set to: ' + apiURL);
+        this.storage.set({ key: 'URL', value: apiURL });
         this._currentConfig.apiURL = apiURL;
         this._currentConfig.apiURLSet = true;
 
