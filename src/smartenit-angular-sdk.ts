@@ -23,6 +23,7 @@ export { DevicesService } from './resources/devices.service';
 export { EffectsService } from './resources/effects.service';
 export { EventsService } from './resources/events.service';
 export { LocationsService } from './resources/locations.service';
+export { DatabaseService } from './storage/database.service';
 export { StorageService } from './storage/storage.service';
 export { RespondersService } from './resources/responders.service';
 export { ScenesService } from './resources/scenes.service';
