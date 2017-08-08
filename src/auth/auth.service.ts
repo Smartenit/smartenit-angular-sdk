@@ -62,10 +62,10 @@ export class AuthService {
             const accessTokenRegistration = this.storage.get('ATR');
             const storedTokenLifetime = this.storage.get('ATL');
             if (accessTokenRegistration && storedTokenLifetime) {
-                let tokenCreation = parseInt(accessTokenRegistration.toString());
-                tokenCreation = Math.floor((Date.now() - tokenCreation) / 1000);
-
-                let tokenLifetime: number = parseInt(storedTokenLifetime.toString());
+                let {
+                    tokenCreation,
+                    tokenLifetime
+                } = this.retrieveAccessTokenTime(accessTokenRegistration, storedTokenLifetime);
 
                 if (tokenCreation > tokenLifetime) {
                     this._tokenWillExpire.next(true);
@@ -78,6 +78,23 @@ export class AuthService {
         }
 
         return loggedIn;
+    }
+
+    retrieveAccessTokenTime(accessTokenRegistration: any, storedTokenLifetime: any) {
+        let tokenCreation = parseInt(accessTokenRegistration.toString());
+        tokenCreation = Math.floor((Date.now() - tokenCreation) / 1000);
+        let tokenLifetime: number = parseInt(storedTokenLifetime.toString());
+
+        return { tokenCreation, tokenLifetime };
+    }
+
+    isAccessTokenExpired(accessTokenRegistration: any, storedTokenLifetime: any) {
+        const {
+            tokenCreation,
+            tokenLifetime
+        } = this.retrieveAccessTokenTime(accessTokenRegistration, storedTokenLifetime);
+
+        return tokenCreation > tokenLifetime;
     }
 
     getAccessToken() {
@@ -116,7 +133,18 @@ export class AuthService {
         }, checkExpiration * 1000);
     }
 
-    getNewAccessTokenFromRefreshToken() {
+    getNewAccessTokenFromRefreshToken(skipIfIsStillValid = false) {
+        if (skipIfIsStillValid) {
+            const accessTokenRegistration = this.storage.get('ATR');
+            const storedTokenLifetime = this.storage.get('ATL');
+            if (accessTokenRegistration && storedTokenLifetime &&
+                !this.isAccessTokenExpired(accessTokenRegistration, storedTokenLifetime)) {
+                console.log('Skipping token refresh...');
+                this.eventsManagerService.trigger(EventsManagerService.ON_RESTORE_NETWORK_STATUS);
+                return;
+            }
+        }
+
         this._tokenWillExpire.next(true);
     }
 

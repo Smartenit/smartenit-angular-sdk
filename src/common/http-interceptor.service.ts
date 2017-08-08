@@ -57,6 +57,10 @@ export class HttpInterceptor extends Http {
     this.eventsManagerService.onTokenRefreshError.subscribe(() => {
       HttpInterceptor._enqueueRequests = false;
     });
+
+    this.eventsManagerService.onRestoreNetworkStatus.subscribe(() => {
+      HttpInterceptor._enqueueRequests = false;
+    });
   }
 
   private drainQueue(newAccessToken?: string) {
