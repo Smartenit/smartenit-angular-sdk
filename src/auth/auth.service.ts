@@ -44,6 +44,10 @@ export class AuthService {
         this.webSocketsService = webSocketsService;
     }
 
+    clearDB(excludedInstances?: [string]) {
+        this.database.clear(excludedInstances);
+    }
+
     logout() {
         if (this.webSocketsService && this.webSocketsService.isConnected) {
             this.webSocketsService.disconnect();

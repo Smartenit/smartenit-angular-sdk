@@ -35,6 +35,8 @@ export class Oauth2Service extends APIClientService {
     }
 
     login(username: string, password: string): Observable<any> {
+        this.authService.clearDB(['local_gateways']);
+
         const clientId = this.authService.getClientId();
         const clientSecret = this.authService.getClientSecret();
 
