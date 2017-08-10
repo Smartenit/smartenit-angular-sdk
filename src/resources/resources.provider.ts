@@ -10,6 +10,7 @@ import { DevicesService } from "./devices.service";
 import { EffectsService } from "./effects.service";
 import { EventsService } from "./events.service";
 import { LocationsService } from "./locations.service";
+import { MetricsService } from "./metrics.service";
 import { PairingsService } from "./pairings.service";
 import { RespondersService } from "./responders.service";
 import { ScenesService } from "./scenes.service";
@@ -34,6 +35,7 @@ export class ResourcesProvider {
     private effectsService: EffectsService,
     private eventsService: EventsService,
     private locationsService: LocationsService,
+    private metricsService: MetricsService,
     private pairingsService: PairingsService,
     private respondersService: RespondersService,
     private scenesService: ScenesService,
@@ -54,6 +56,7 @@ export class ResourcesProvider {
       effects: effectsService,
       events: eventsService,
       locations: locationsService,
+      metrics: metricsService,
       pairings: pairingsService,
       responders: respondersService,
       scenes: scenesService,

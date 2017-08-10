@@ -20,6 +20,7 @@ import { EventsService } from '../resources/events.service';
 import { ScenesService } from '../resources/scenes.service';
 import { PairingsService } from '../resources/pairings.service';
 import { MediaService } from '../resources/media.service';
+import { MetricsService } from '../resources/metrics.service';
 import { WizardsService } from '../resources/wizards.service';
 import { PluginFactoryService } from '../plugins/plugin-factory.service';
 import { PluginUtilsService } from '../plugins/plugin-utils.service';
@@ -75,6 +76,7 @@ export class SmartenitModule {
                 ScenesService,
                 PairingsService,
                 MediaService,
+                MetricsService,
                 WizardsService,
                 PluginFactoryService,
                 PluginUtilsService,
@@ -114,6 +116,7 @@ export class SmartenitModule {
                 ScenesService,
                 PairingsService,
                 MediaService,
+                MetricsService,
                 WizardsService,
                 PluginFactoryService,
                 PluginUtilsService,
@@ -151,6 +154,7 @@ export class SmartenitModule {
                 ScenesService,
                 PairingsService,
                 MediaService,
+                MetricsService,
                 WizardsService,
                 PluginFactoryService,
                 PluginUtilsService,
