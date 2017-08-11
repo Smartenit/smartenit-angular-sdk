@@ -3,6 +3,7 @@ import { Http } from '@angular/http';
 
 import { APIClientService } from './api-client.service';
 import { AuthService } from "../auth/auth.service";
+import { BACKEND_DATA_LIMIT } from "../common/app-configuration.service";
 import { EventsManagerService } from "../common/events-manager.service";
 import { ISmartenitConfig } from "../smartenit-config.interface";
 import { Observable } from "rxjs/Observable";
@@ -114,5 +115,24 @@ export abstract class CRUDService extends APIClientService {
 
       return apiResponse;
     });
+  }
+
+  listBase(query?: any, options?: IRequestOptions): Observable<any> {
+    return this.list(query, options);
+  }
+
+  retrieveAll(page: number = 1, query: any = null, options: IRequestOptions = {}, acc: Array<any> = []): Observable<any> {
+    return Observable.defer(
+      () => this.listBase(query, Object.assign({}, options, { page }))
+        .flatMap(({ data, _links }) => {
+          acc = acc.concat(data);
+          const items = Observable.of(acc);
+          const nextData = (_links && ((page + 1) <= Math.ceil(_links.total / BACKEND_DATA_LIMIT)))
+            ? this.retrieveAll(page + 1, query, options, acc)
+            : Observable.empty();
+
+          return Observable.concat(items, nextData);
+        })
+    );
   }
 }

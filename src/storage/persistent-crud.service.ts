@@ -7,7 +7,7 @@ import 'rxjs/add/operator/share';
 import { AuthService } from "../auth/auth.service";
 import { EventsManagerService } from "../common/events-manager.service";
 import { ISmartenitConfig } from "../smartenit-config.interface";
-import { AppConfigurationService, BACKEND_DATA_LIMIT } from '../common/app-configuration.service';
+import { AppConfigurationService } from '../common/app-configuration.service';
 import { CRUDService } from "../common/crud.service";
 import { IRequestOptions } from "../common/request-options.interface";
 import { DataQueryService } from "../common/data-query.service";
@@ -19,7 +19,6 @@ import { HttpInterceptor } from "../common/http-interceptor.service";
 @Injectable()
 export abstract class PersistentCRUDService extends CRUDService {
   protected resource: string;
-  protected useCollection: boolean = true;
   public collection: DatabaseCollection;
   private listAllObservable: Observable<any>;
 
@@ -35,13 +34,11 @@ export abstract class PersistentCRUDService extends CRUDService {
   ) {
     super(resource, http, authService, eventsService, AppConfiguration);
     this.resource = resource;
-    if (this.useCollection) {
-      this.collection = dbService.getCollection(resource);
-    }
+    this.collection = dbService.getCollection(resource);
   }
 
   tearUpListAll() {
-    this.listAllObservable = this.retrieveAll()
+    this.listAllObservable = super.retrieveAll()
       .flatMap((resourcesList) => this.processListData({ data: resourcesList }))
       .share();
   }
@@ -55,13 +52,15 @@ export abstract class PersistentCRUDService extends CRUDService {
       return this.syncService.processOfflineSave(this.resource, data);
     } else {
       return super.save(data, options).flatMap((apiData) => {
-        return (this.useCollection)
-          ? this.collection.save(apiData.data._id, apiData.data).flatMap(() => {
-              return Observable.of(apiData);
-            })
-          : Observable.of(apiData);
+        return this.collection.save(apiData.data._id, apiData.data).flatMap(() => {
+          return Observable.of(apiData);
+        })
       });
     }
+  }
+
+  listBase(query?: any, options?: IRequestOptions): Observable<any> {
+    return super.list(query, options);
   }
 
   list(query?: any, options?: IRequestOptions): Observable<any> {
@@ -77,14 +76,12 @@ export abstract class PersistentCRUDService extends CRUDService {
   }
 
   listFromLocalStorage(query?: any, options?: IRequestOptions): Observable<any> {
-    return (this.useCollection)
-      ? this.collection.list().map((resourcesList) => ({
-          message: 'Read list from local DB',
-          data: this.dataQueryService
-            .filterAndSliceData(resourcesList.map((data: any) => this.createModel(data.value)), query, options || {}),
-          total: resourcesList.length
-        }))
-      : Observable.empty();
+    return this.collection.list().map((resourcesList) => ({
+      message: 'Read list from local DB',
+      data: this.dataQueryService
+        .filterAndSliceData(resourcesList.map((data: any) => this.createModel(data.value)), query, options || {}),
+      total: resourcesList.length
+    }));
   }
 
   listFromBackend(query?: any, options?: IRequestOptions): Observable<any> {
@@ -94,35 +91,18 @@ export abstract class PersistentCRUDService extends CRUDService {
   listAllFromBackend(shared: boolean, query?: any, options?: IRequestOptions): Observable<any> {
     return shared
       ? this.listAllObservable
-      : this.retrieveAll(1, query, options)
+      : super.retrieveAll(1, query, options)
         .flatMap((resourcesList) => this.processListData({ data: resourcesList }));
-  }
-
-  retrieveAll(page: number = 1, query: any = null, options: IRequestOptions = {}, acc: Array<any> = []): Observable<any> {
-    return Observable.defer(
-      () => super.list(query, Object.assign({}, options, { page }))
-        .flatMap(({ data, _links }) => {
-          acc = acc.concat(data);
-          const items = Observable.of(acc);
-          const nextData = (_links && ((page + 1) <= Math.ceil(_links.total / BACKEND_DATA_LIMIT)))
-            ? this.retrieveAll(page + 1, query, options, acc)
-            : Observable.empty();
-
-          return Observable.concat(items, nextData);
-        })
-    );
   }
 
   processListData(resourcesList: any): Observable<any> {
     let saveOperations: Array<Observable<any>> = [];
 
-    if (this.useCollection) {
-      for (let i = 0; i < resourcesList.data.length; i++) {
-        let resourceObject = resourcesList.data[i];
+    for (let i = 0; i < resourcesList.data.length; i++) {
+      let resourceObject = resourcesList.data[i];
 
-        if (resourceObject && resourceObject._id) {
-          saveOperations.push(this.collection.save(resourceObject._id, resourceObject));
-        }
+      if (resourceObject && resourceObject._id) {
+        saveOperations.push(this.collection.save(resourceObject._id, resourceObject));
       }
     }
 
@@ -148,27 +128,23 @@ export abstract class PersistentCRUDService extends CRUDService {
   }
 
   getByIdFromLocalStorage(resourceId: string, options?: IRequestOptions): Observable<any> {
-    return (this.useCollection)
-      ? this.collection.getById(resourceId).flatMap((resourceResponse) => {
-          if (resourceResponse) {
-            return Observable.of({
-              message: 'Read item from local DB',
-              data: this.createModel(resourceResponse)
-            });
-          } else {
-            return this.getByIdFromBackend(resourceId, options);
-          }
-        })
-      : this.getByIdFromBackend(resourceId, options);
+    return this.collection.getById(resourceId).flatMap((resourceResponse) => {
+      if (resourceResponse) {
+        return Observable.of({
+          message: 'Read item from local DB',
+          data: this.createModel(resourceResponse)
+        });
+      } else {
+        return this.getByIdFromBackend(resourceId, options);
+      }
+    });
   }
 
   getByIdFromBackend(resourceId: string, options?: IRequestOptions): Observable<any> {
     return super.getById(resourceId, options).flatMap((resourceResponse) => {
-      return (this.useCollection)
-        ? this.collection.save(resourceId, resourceResponse.data).flatMap(() => {
-            return Observable.of(resourceResponse);
-          })
-        : Observable.of(resourceResponse);
+      return this.collection.save(resourceId, resourceResponse.data).flatMap(() => {
+        return Observable.of(resourceResponse);
+      });
     });
   }
 
@@ -183,9 +159,7 @@ export abstract class PersistentCRUDService extends CRUDService {
   }
 
   removeFromLocalStorage(resourceId: string, removeData: any): Observable<any> {
-    return (this.useCollection)
-      ? this.collection.removeById(resourceId).map(() => (removeData))
-      : Observable.of(removeData);
+    return this.collection.removeById(resourceId).map(() => (removeData));
   }
 
   removeById(resourceId: string, options?: IRequestOptions): Observable<any> {
@@ -193,15 +167,13 @@ export abstract class PersistentCRUDService extends CRUDService {
   }
 
   mergeInCollection(resourceId: string, resource: any): Observable<any> {
-    return (this.useCollection)
-      ? this.collection.getById(resourceId)
-          .flatMap((resourceResponse) => {
-            if (resourceResponse) {
-              return this.collection.save(resourceId, Object.assign({}, resourceResponse, resource));
-            } else {
-              return Observable.of(resourceResponse);
-            }
-          })
-      : Observable.empty();
+    return this.collection.getById(resourceId)
+      .flatMap((resourceResponse) => {
+        if (resourceResponse) {
+          return this.collection.save(resourceId, Object.assign({}, resourceResponse, resource));
+        } else {
+          return Observable.of(resourceResponse);
+        }
+      });
   }
 }
