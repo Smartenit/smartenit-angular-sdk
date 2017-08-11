@@ -25,6 +25,7 @@ import { ActionsService } from "../resources/actions.service";
 import { EffectsService } from "../resources/effects.service";
 import { ConditionsService } from "../resources/conditions.service";
 import { DevicesService } from "../resources/devices.service";
+import { MetricsService } from "../resources/metrics.service";
 import { PluginUtilsService } from "./plugin-utils.service";
 
 const plugins: any = {
@@ -58,7 +59,8 @@ export class PluginFactoryService {
     public actionsService: ActionsService,
     public effectsService: EffectsService,
     public conditionsService: ConditionsService,
-    public pluginUtilsService: PluginUtilsService
+    public pluginUtilsService: PluginUtilsService,
+    public metricsService: MetricsService
   ) {
     this._plugins = {};
   }
@@ -88,7 +90,8 @@ export class PluginFactoryService {
           this.actionsService,
           this.conditionsService,
           this.effectsService,
-          this.pluginUtilsService
+          this.pluginUtilsService,
+          this.metricsService
         );
 
         this._plugins[key] = newPlugin;

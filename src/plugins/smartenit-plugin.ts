@@ -9,6 +9,7 @@ import { DevicesService } from "../resources/devices.service";
 import { ActionsService } from "../resources/actions.service";
 import { ConditionsService } from "../resources/conditions.service";
 import { EffectsService } from "../resources/effects.service";
+import { MetricsService } from "../resources/metrics.service";
 import { PluginUtilsService } from "./plugin-utils.service";
 
 export abstract class SmartenitPlugin {
@@ -136,7 +137,8 @@ export abstract class SmartenitPlugin {
     public actionsService: ActionsService,
     public conditionsService: ConditionsService,
     public effectsService: EffectsService,
-    public pluginUtilsService: PluginUtilsService
+    public pluginUtilsService: PluginUtilsService,
+    public metricsService: MetricsService
   ) {
     this._name = name;
     this._device = device;
