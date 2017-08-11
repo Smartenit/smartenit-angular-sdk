@@ -46,14 +46,18 @@ export class MetricsService extends CRUDService {
       }
 
       if (minDate && maxDate) {
-        query.createdAt = { $gte: minDate, $lte: maxDate };
+        query['value.timestamp'] = { $gte: this.toEpoch(minDate), $lte: this.toEpoch(maxDate) };
       } else if (minDate) {
-        query.createdAt = { $gte: minDate };
+        query['value.timestamp'] = { $gte: this.toEpoch(minDate) };
       } else if (maxDate) {
-        query.createdAt = { $lte: minDate };
+        query['value.timestamp'] = { $lte: this.toEpoch(maxDate) };
       }
     }
 
     return super.retrieveAll(1, query, options);
+  }
+
+  private toEpoch(date: string) {
+    return ((new Date(date)).getTime()) / 1000;
   }
 }

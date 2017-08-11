@@ -10,11 +10,15 @@ export class MetricModel extends Model {
     return this._data.resourceId;
   }
 
-  get createdAt(): any {
-    return this._data.createdAt;
+  get timestamp(): any {
+    return this._data.value && this._data.value.timestamp;
   }
 
   get value(): string {
+    return this._data.value;
+  }
+
+  get innerValue(): string {
     return this._data.value && this._data.value.value;
   }
 
