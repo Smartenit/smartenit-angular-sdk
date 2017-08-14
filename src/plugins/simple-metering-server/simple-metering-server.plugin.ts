@@ -81,7 +81,7 @@ export class SimpleMeteringServerPlugin extends SmartenitPlugin implements IText
     };
     const commonOptions: any = {
       limit: 1,
-      sort: ['-value.timestamp']
+      sort: /*['-value.timestamp']*/['-createdAt']
     };
 
     Observable.forkJoin([
