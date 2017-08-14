@@ -127,7 +127,7 @@ export abstract class CRUDService extends APIClientService {
         .flatMap(({ data, _links }) => {
           acc = acc.concat(data);
           const items = Observable.of(acc);
-          const nextData = (_links && ((page + 1) <= Math.ceil(_links.total / BACKEND_DATA_LIMIT)))
+          const nextData = ((options.limit == null || options.limit > BACKEND_DATA_LIMIT) && _links && ((page + 1) <= Math.ceil(_links.total / BACKEND_DATA_LIMIT)))
             ? this.retrieveAll(page + 1, query, options, acc)
             : Observable.empty();
 

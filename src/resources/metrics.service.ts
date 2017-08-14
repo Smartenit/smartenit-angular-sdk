@@ -52,7 +52,7 @@ export class MetricsService extends CRUDService {
         query.createdAt = { $gte: minDate };
         //query['value.timestamp'] = { $gte: this.toEpoch(minDate) };
       } else if (maxDate) {
-        query.createdAt = { $lte: minDate };
+        query.createdAt = { $lte: maxDate };
         //query['value.timestamp'] = { $lte: this.toEpoch(maxDate) };
       }
     }
