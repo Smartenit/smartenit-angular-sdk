@@ -119,25 +119,25 @@ export class SimpleMeteringServerPlugin extends SmartenitPlugin implements IText
   }
 
   getCurrentSummation(): string {
-    return (this.state.currentSummation)
+    return (this.state.currentSummation != null)
       ? (!isNaN(Number(this.state.currentSummation))) ? Number(this.state.currentSummation).toFixed(3) : this.state.currentSummation
       : '-';
   }
 
   getInstantaneousDemand(): string {
-    return (this.state.instantaneousPower)
+    return (this.state.instantaneousPower != null)
       ? (!isNaN(Number(this.state.instantaneousPower))) ? Number(this.state.instantaneousPower).toFixed(3) : this.state.instantaneousPower
       : '-';
   }
 
   getPeriodCost(): string {
-    return (this.periodCost)
+    return (this.periodCost != null)
       ? (!isNaN(Number(this.periodCost))) ? Number(this.periodCost).toFixed(2) : this.periodCost
       : '-';
   }
 
   getPeriodSummation(): string {
-    return (this.periodSummation)
+    return (this.periodSummation != null)
       ? (!isNaN(Number(this.periodSummation))) ? Number(this.periodSummation).toFixed(3) : this.periodSummation
       : '-';
   }

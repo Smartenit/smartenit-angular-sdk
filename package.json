@@ -1,6 +1,6 @@
 {
     "name": "smartenit-angular-sdk",
-    "version": "0.2.23",
+    "version": "0.2.24",
     "description": "Smartenit Angular SDK",
     "main": "./bundles/smartenit-angular-sdk.umd.js",
     "module": "./modules/smartenit-angular-sdk.es5.js",
