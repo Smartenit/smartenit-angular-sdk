@@ -119,6 +119,14 @@ export class SimpleMeteringServerPlugin extends SmartenitPlugin implements IText
     return 'CurrentSummationDeliveredValue';
   }
 
+  getConditionOptions(): any {
+    return null;
+  }
+
+  getEffectOptions(): any {
+    return null;
+  }
+
   getEffectAttribute(): string | null {
     return null;
   }

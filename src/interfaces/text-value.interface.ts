@@ -1,3 +1,3 @@
 export interface ITextValue {
-  getTextValue(context?:string): string;
+  getTextValue(context?: string): string;
 }

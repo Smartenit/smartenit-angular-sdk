@@ -34,11 +34,13 @@ export { PairingsService } from './resources/pairings.service';
 export { GatewayConnectivityService } from './common/gateway-connectivity.service';
 export { NaturalLanguageService } from './common/natural-language.service';
 
+export { Model } from './common/model';
 export { ResponderModel } from './models/responder.model';
 export { ConditionModel } from './models/condition.model';
 export { DeviceModel } from './models/device.model';
 export { AreaModel } from './models/area.model';
 export { ActionModel } from './models/action.model';
+export { LocationModel } from './models/location.model';
 export { AccountModel } from './models/account.model';
 export { ControllerModel } from './models/controller.model';
 export { SceneModel } from './models/scene.model';

@@ -54,6 +54,14 @@ export class RelativeHumidityMeasurementServerPlugin extends SmartenitPlugin imp
     return '%';
   }
 
+  getConditionOptions(): any {
+    return null;
+  }
+
+  getEffectOptions(): any {
+    return null;
+  }
+
   getTextValue(context?: string) {
     return String(this.getValue()) + " " + this.getUnit();
   }

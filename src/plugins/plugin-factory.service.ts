@@ -20,7 +20,10 @@ import { PowerConfigurationServerPlugin } from "./power-configuration-server/pow
 import { TemperatureMeasurementServerPlugin } from "./temperature-measurement-server/temperature-measurement-server.plugin";
 import { RelativeHumidityMeasurementServerPlugin } from "./relative-humidity-measurement-server/relative-humidity-measurement-server.plugin";
 import { FanControlServerPlugin } from "./fan-control-server/fan-control-server.plugin";
+import { EnergyManagementPlugin } from "./energy-management/energy-management.plugin";
+
 import { DeviceModel } from "../models/device.model";
+import { Model } from "../common/model";
 import { ActionsService } from "../resources/actions.service";
 import { EffectsService } from "../resources/effects.service";
 import { ConditionsService } from "../resources/conditions.service";
@@ -46,7 +49,8 @@ const plugins: any = {
   'IASACEServerPlugin': IASACEServerPlugin,
   'IASWDClientPlugin': IASWDClientPlugin,
   'NotificationServerPlugin': NotificationServerPlugin,
-  'FanControlServerPlugin': FanControlServerPlugin
+  'FanControlServerPlugin': FanControlServerPlugin,
+  'EnergyManagementPlugin': EnergyManagementPlugin
 };
 
 @Injectable()
@@ -68,9 +72,9 @@ export class PluginFactoryService {
   }
 
   createPlugin(
-    pluginName: string, componentId: string, processorName: string, device: DeviceModel, devicesService: DevicesService
+    pluginName: string, componentId: string, processorName: string, resource: Model, devicesService: DevicesService
   ): SmartenitPlugin | null {
-    const key = PluginFactoryService.getPluginKey(device._id, componentId, processorName);
+    const key = PluginFactoryService.getPluginKey(resource._id, componentId, processorName);
 
     if (this._plugins.hasOwnProperty(key)) {
       return this._plugins[key];
@@ -82,7 +86,7 @@ export class PluginFactoryService {
           pluginName,
           componentId,
           processorName,
-          device,
+          resource,
           this.dbService,
           devicesService,
           this.actionsService,

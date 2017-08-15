@@ -169,6 +169,15 @@ export class DeviceModel extends Model {
 
           pluginKey = DeviceModel.getPluginKey(component.id, processor.name);
 
+          // inject energy management plugin for simple metering processors
+          if (processor.name == 'SimpleMeteringServer') {
+            let energyPlugin = deviceInstance.pluginFactory.createPlugin('EnergyManagement', component.id, 'EnergyManagement', deviceInstance, deviceInstance.devicesService);
+            const energyPluginKey = DeviceModel.getPluginKey(component.id, 'EnergyManagement');
+
+            deviceInstance._processors.push(energyPlugin);
+            deviceInstance._plugins[energyPluginKey] = energyPlugin;
+          }
+
           plugin = deviceInstance.pluginFactory.createPlugin(processor.name, component.id, processor.name, deviceInstance, deviceInstance.devicesService);
 
           processor.componentId = component.id;

@@ -1,4 +1,6 @@
-export interface IOnOff {
+import { IAutomationRule } from './automation-rule.interface';
+
+export interface IOnOff extends IAutomationRule {
   on(): void;
 
   off(): void;
@@ -8,14 +10,4 @@ export interface IOnOff {
   isOn(): boolean;
 
   isOff(): boolean;
-
-  getConditionOptions(): any;
-
-  getConditionAttribute(): string;
-
-  getEffectOptions(): any;
-
-  getEffectAttribute(): string;
-
-  getEffectMethod(context?: any): string | null;
 }

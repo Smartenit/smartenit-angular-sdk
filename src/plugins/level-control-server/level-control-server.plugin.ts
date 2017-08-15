@@ -42,6 +42,14 @@ export class LevelControlServerPlugin extends SmartenitPlugin implements INumeri
     return 'MoveToLevelWOnOff';
   }
 
+  getConditionOptions(): any {
+    return null;
+  }
+
+  getEffectOptions(): any {
+    return null;
+  }
+
   getEffectPayload(value: any, attribute?: string, method?: string) {
     return { Level: this.getRawValue(value, attribute, method), TransitionTime: 0 };
   }

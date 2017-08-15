@@ -50,6 +50,14 @@ export class TemperatureMeasurementServerPlugin extends SmartenitPlugin implemen
     return null;
   }
 
+  getConditionOptions(): any {
+    return null;
+  }
+
+  getEffectOptions(): any {
+    return null;
+  }
+
   getUnit(attribute?: string): string {
     return '°C';
   }

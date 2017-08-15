@@ -23,6 +23,14 @@ export class ElectricalMeasurementServerPlugin extends SmartenitPlugin implement
     return 'ActivePower';
   }
 
+  getConditionOptions(): any {
+    return null;
+  }
+
+  getEffectOptions(): any {
+    return null;
+  }
+
   getEffectAttribute(): string | null {
     return null;
   }

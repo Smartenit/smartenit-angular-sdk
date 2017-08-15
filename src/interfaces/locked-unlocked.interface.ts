@@ -1,4 +1,6 @@
-export interface ILockedUnlocked {
+import { IAutomationRule } from './automation-rule.interface';
+
+export interface ILockedUnlocked extends IAutomationRule {
   lock(): void;
 
   unlock(): void;
@@ -6,16 +8,6 @@ export interface ILockedUnlocked {
   isLocked(): boolean;
 
   isUnlocked(): boolean;
-
-  getConditionOptions(): any;
-
-  getConditionAttribute(): string;
-
-  getEffectOptions(): any;
-
-  getEffectAttribute(): string | null;
-
-  getEffectMethod(context?: any): string | null;
 
   getLastUpdateTimestamp(): number;
 }

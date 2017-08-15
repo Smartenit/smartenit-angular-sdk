@@ -48,6 +48,14 @@ export class PowerConfigurationServerPlugin extends SmartenitPlugin implements I
     return '%';
   }
 
+  getConditionOptions(): any {
+    return null;
+  }
+
+  getEffectOptions(): any {
+    return null;
+  }
+
   getStatus(context?: string, subscribe?: boolean): any {
     this.getCache('battery_percentage_remaining').subscribe((percentage: any) => {
       if (percentage == null) {
