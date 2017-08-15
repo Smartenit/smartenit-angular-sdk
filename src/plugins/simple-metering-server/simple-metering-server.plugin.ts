@@ -119,19 +119,27 @@ export class SimpleMeteringServerPlugin extends SmartenitPlugin implements IText
   }
 
   getCurrentSummation(): string {
-    return this.state.currentSummation || '-';
+    return (this.state.currentSummation)
+      ? (!isNaN(Number(this.state.currentSummation))) ? Number(this.state.currentSummation).toFixed(3) : this.state.currentSummation
+      : '-';
   }
 
   getInstantaneousDemand(): string {
-    return this.state.instantaneousPower || '-';
+    return (this.state.instantaneousPower)
+      ? (!isNaN(Number(this.state.instantaneousPower))) ? Number(this.state.instantaneousPower).toFixed(3) : this.state.instantaneousPower
+      : '-';
   }
 
   getPeriodCost(): string {
-    return this.periodCost || '-';
+    return (this.periodCost)
+      ? (!isNaN(Number(this.periodCost))) ? Number(this.periodCost).toFixed(2) : this.periodCost
+      : '-';
   }
 
   getPeriodSummation(): string {
-    return this.periodSummation || '-';
+    return (this.periodSummation)
+      ? (!isNaN(Number(this.periodSummation))) ? Number(this.periodSummation).toFixed(3) : this.periodSummation
+      : '-';
   }
 
   getUnit(attribute?: string): string {
@@ -199,6 +207,16 @@ export class SimpleMeteringServerPlugin extends SmartenitPlugin implements IText
 
   getStatusPayload(): any {
     return ['CurrentSummationDeliveredValue', 'InstantaneousDemandValue', 'UnitofMeasure'];
+  }
+
+  getStatus(context?: string, force?: boolean, asObservable?: boolean, payload?: any) {
+    if (payload && Object.keys(payload).length > 0) {
+      payload = Object.assign(this.getStatusPayload(), payload);
+    } else {
+      payload = this.getStatusPayload();
+    }
+
+    this.device.getStatus(this.componentId, this.processorName, payload, 'cached=false');
   }
 
   processMessage(message: IWebSocketDeviceMessage): any {
