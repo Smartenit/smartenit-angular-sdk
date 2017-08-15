@@ -1,8 +1,17 @@
+import { Observable } from "rxjs/Observable";
+
 import { SmartenitPlugin } from "../smartenit-plugin";
-import { IWebSocketDeviceMessage } from "../../websockets/websocket-device-message.interface";
 import { ITextValue } from "../../interfaces/text-value.interface";
 import { INumericValue } from "../../interfaces/numeric-value.interface";
-import { Observable } from "rxjs/Observable";
+import { DeviceModel } from "../../models/device.model";
+import { ActionsService } from "../../resources/actions.service";
+import { ConditionsService } from "../../resources/conditions.service";
+import { DevicesService } from "../../resources/devices.service";
+import { EffectsService } from "../../resources/effects.service";
+import { MetricsService } from "../../resources/metrics.service";
+import { DatabaseService } from "../../storage/database.service";
+import { IWebSocketDeviceMessage } from "../../websockets/websocket-device-message.interface";
+import { PluginUtilsService } from "../plugin-utils.service";
 
 import "rxjs/add/observable/of";
 
@@ -35,6 +44,12 @@ export class SimpleMeteringServerPlugin extends SmartenitPlugin implements IText
     '0x8B': ['', ''],
     '0x8C': ['MJ', 'MJ/s']
   };
+  static readonly PERIOD_COST_NAME = 'PeriodCost';
+  static readonly PERIOD_SUMMATION_NAME = 'PeriodSummation';
+
+  supportsEnergyUsage: boolean = false;
+  periodCost: string = '-';
+  periodSummation: string = '-';
 
   onInit() {
     if (this.device && this.device.type) {
@@ -48,6 +63,11 @@ export class SimpleMeteringServerPlugin extends SmartenitPlugin implements IText
         this.state.firstUnit = SimpleMeteringServerPlugin.UNITS['0x00'][0];
         this.state.secondUnit = SimpleMeteringServerPlugin.UNITS['0x00'][1];
       }
+
+      this.supportsEnergyUsage = this.device.meta && this.device.meta.hasEnergyManagement;
+      if (this.supportsEnergyUsage) {
+        this.requestMetrics();
+      }
     }
 
     this.getCache('unit_of_measure').subscribe((units) => {
@@ -55,6 +75,38 @@ export class SimpleMeteringServerPlugin extends SmartenitPlugin implements IText
         this.state.firstUnit = units[0];
         this.state.secondUnit = units[1];
       }
+    });
+  }
+
+  requestMetrics() {
+    const commonQuery: any = {
+      resource: 'devices',
+      resourceId: this.device._id
+    };
+    const commonOptions: any = {
+      limit: 1,
+      sort: /*['-value.timestamp']*/['-createdAt']
+    };
+
+    Observable.forkJoin([
+      this.metricsService.retrieveMetrics(Object.assign({}, commonQuery, {
+        name: SimpleMeteringServerPlugin.PERIOD_SUMMATION_NAME
+      }), commonOptions),
+      this.metricsService.retrieveMetrics(Object.assign({}, commonQuery, {
+        name: SimpleMeteringServerPlugin.PERIOD_COST_NAME
+      }), commonOptions)
+    ]).subscribe(dataSeries => {
+      const periodSummationData = dataSeries[0];
+      const periodCostData = dataSeries[1];
+
+      if (periodSummationData.length > 0) {
+        this.periodSummation = periodSummationData[0].innerValue;
+      }
+      if (periodCostData.length > 0) {
+        this.periodCost = periodCostData[0].innerValue;
+      }
+
+      this._onUpdate.next({});
     });
   }
 
@@ -67,11 +119,27 @@ export class SimpleMeteringServerPlugin extends SmartenitPlugin implements IText
   }
 
   getCurrentSummation(): string {
-    return this.state.currentSummation;
+    return (this.state.currentSummation != null)
+      ? (!isNaN(Number(this.state.currentSummation))) ? Number(this.state.currentSummation).toFixed(3) : this.state.currentSummation
+      : '-';
   }
 
   getInstantaneousDemand(): string {
-    return this.state.instantaneousPower;
+    return (this.state.instantaneousPower != null)
+      ? (!isNaN(Number(this.state.instantaneousPower))) ? Number(this.state.instantaneousPower).toFixed(3) : this.state.instantaneousPower
+      : '-';
+  }
+
+  getPeriodCost(): string {
+    return (this.periodCost != null)
+      ? (!isNaN(Number(this.periodCost))) ? Number(this.periodCost).toFixed(2) : this.periodCost
+      : '-';
+  }
+
+  getPeriodSummation(): string {
+    return (this.periodSummation != null)
+      ? (!isNaN(Number(this.periodSummation))) ? Number(this.periodSummation).toFixed(3) : this.periodSummation
+      : '-';
   }
 
   getUnit(attribute?: string): string {
@@ -139,13 +207,24 @@ export class SimpleMeteringServerPlugin extends SmartenitPlugin implements IText
     if (context && context == 'displayCurrentSummationOnly') {
       return this.getCurrentSummation() + this.getSecondUnit();
     } else {
-      return this.getCurrentSummation() + this.getSecondUnit() + ' / ' +
-        this.getInstantaneousDemand() + this.getFirstUnit();
+      return (this.supportsEnergyUsage)
+        ? `{{CURRENCY}}${this.getPeriodCost()} / ${this.getPeriodSummation()}${this.getSecondUnit()} / ${this.getInstantaneousDemand()}${this.getFirstUnit()}`
+        : `${this.getCurrentSummation()}${this.getSecondUnit()} / ${this.getInstantaneousDemand()}${this.getFirstUnit()}`;
     }
   }
 
   getStatusPayload(): any {
     return ['CurrentSummationDeliveredValue', 'InstantaneousDemandValue', 'UnitofMeasure'];
+  }
+
+  getStatus(context?: string, force?: boolean, asObservable?: boolean, payload?: any) {
+    if (payload && Object.keys(payload).length > 0) {
+      payload = Object.assign(this.getStatusPayload(), payload);
+    } else {
+      payload = this.getStatusPayload();
+    }
+
+    this.device.getStatus(this.componentId, this.processorName, payload, 'cached=false');
   }
 
   processMessage(message: IWebSocketDeviceMessage): any {
