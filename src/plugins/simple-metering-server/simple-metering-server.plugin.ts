@@ -47,6 +47,7 @@ export class SimpleMeteringServerPlugin extends SmartenitPlugin implements IText
   static readonly PERIOD_COST_NAME = 'PeriodCost';
   static readonly PERIOD_SUMMATION_NAME = 'PeriodSummation';
 
+  supportsEnergyUsage: boolean = false;
   periodCost: string = '-';
   periodSummation: string = '-';
 
@@ -63,7 +64,10 @@ export class SimpleMeteringServerPlugin extends SmartenitPlugin implements IText
         this.state.secondUnit = SimpleMeteringServerPlugin.UNITS['0x00'][1];
       }
 
-      this.requestMetrics();
+      this.supportsEnergyUsage = this.device.meta && this.device.meta.hasEnergyManagement;
+      if (this.supportsEnergyUsage) {
+        this.requestMetrics();
+      }
     }
 
     this.getCache('unit_of_measure').subscribe((units) => {
@@ -187,7 +191,9 @@ export class SimpleMeteringServerPlugin extends SmartenitPlugin implements IText
     if (context && context == 'displayCurrentSummationOnly') {
       return this.getCurrentSummation() + this.getSecondUnit();
     } else {
-      return `{{CURRENCY}}${this.getPeriodCost()} / ${this.getPeriodSummation()}${this.getSecondUnit()} / ${this.getInstantaneousDemand()}${this.getFirstUnit()}`;
+      return (this.supportsEnergyUsage)
+        ? `{{CURRENCY}}${this.getPeriodCost()} / ${this.getPeriodSummation()}${this.getSecondUnit()} / ${this.getInstantaneousDemand()}${this.getFirstUnit()}`
+        : `${this.getCurrentSummation()}${this.getSecondUnit()} / ${this.getInstantaneousDemand()}${this.getFirstUnit()}`;
     }
   }
 
