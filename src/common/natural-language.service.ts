@@ -266,13 +266,7 @@ export class NaturalLanguageService {
 
   private getDeviceIdFromPath(path: string = '') {
     // /devices/582a1bddad04460fe3ac527a/comps/1/procs/OnOff/methods/On
-
-    let split = path.split('/');
-    if (split.length > 2 && split[1] == 'devices') {
-      return split[2];
-    }
-
-    return null;
+    return this.getResourceIdFromPath(path, 'devices');
   }
 
   private getComponentName(item: any) {
@@ -302,21 +296,7 @@ export class NaturalLanguageService {
   }
 
   private getDeviceName(resource: any) {
-    if (resource.path && resource.parents && Array.isArray(resource.parents.devices)) {
-      let deviceId = this.getDeviceIdFromPath(resource.path);
-
-      if (deviceId) {
-        for (let i = 0; i < resource.parents.devices.length; i++) {
-          let parent = resource.parents.devices[i];
-
-          if (parent.id.toString() == deviceId) {
-            return parent.name;
-          }
-        }
-      }
-    }
-
-    return null;
+    return this.getResourceNameFromParents(resource, 'devices');
   }
 
   private parseAttributeName(path: string) {
@@ -390,6 +370,12 @@ export class NaturalLanguageService {
 
     } else if (attrStr === 'local temperature') {
       desc = deviceName + ' Temperature ' + connector + ' ' + val + '°C';
+
+    } else if (attrStr === 'period cost') {
+      desc = deviceName + ' cost ' + connector + ' ' + val + ' USD';
+
+    } else if (attrStr === 'period summation') {
+        desc = deviceName + ' consumption ' + connector + ' ' + val + ' kW';
 
     } else if (attrStr === 'system mode') {
       const idx = parseInt(val);
@@ -486,37 +472,40 @@ export class NaturalLanguageService {
   private setDeviceConditionDescription(condition: any, connector: string, val: string, device?: DeviceModel) {
     let description = '';
 
-    if (condition.path && condition.type == 'device-state') {
+    if (condition.path && (condition.type == 'device-state' || condition.type == 'energy-management')) {
+      var resName = condition.type == 'device-state' ? 'devices' : this.getResourceNameFromPath(condition.path);
       let attr = this.parseAttributeName(condition.path);
       const methodParam = this.getMethodFromPath(condition.path, true);
-      const deviceId = this.getDeviceIdFromPath(condition.path);
-      const processorName = this.getDeviceProcessorFromPath(condition.path);
-      const componentId = this.getDeviceComponentFromPath(condition.path);
+      var resId = this.getResourceIdFromPath(condition.path, resName);
+      var processorName = this.getProcessorFromPath(condition.path, resName);
+      var componentId = this.getComponentFromPath(condition.path, resName);
 
       attr = attr === 'attribute' && methodParam ? methodParam : attr;
 
-      if (deviceId && device) {
-        const deviceName = this.getMultipleComponentsName(device, deviceId, processorName, componentId, condition.parents);
-
-        const supportedConnector =
-          'is equal to' === connector ||
-          'is above' === connector ||
-          'is below' === connector ||
-          'is' === connector ||
-          'detects' === connector;
-
-        if (supportedConnector) {
-          if (processorName) {
-            description = this.append(description, 'when ' + this.parseAttributeCondition(attr, val, deviceName, connector, processorName));
-          }
-
+      if (resId) {
+        var resourceName;
+        if (condition.type == 'energy-management') {
+            resourceName = this.getResourceNameFromParents(condition, resName);
         } else {
-          description = this.append(description, 'when ' + attr + ' in ' + deviceName + ' ' + connector + ' ' + val);
+            resourceName = this.getMultipleComponentsName(device, resId, processorName, componentId, condition.parents);
         }
+
+        var supportedConnector =
+        'is equal to' === connector ||
+        'is above' === connector ||
+        'is below' === connector ||
+        'is' === connector ||
+        'detects' === connector;
+
+      if (supportedConnector) {
+        description = this.append(description, 'when ' + this.parseAttributeCondition(attr, val, resourceName, connector, processorName));
+      } else {
+        description = this.append(description, 'when ' + attr + ' in ' + resourceName + ' ' + connector + ' ' + val);
       }
     }
+  }
 
-    return description;
+  return description;
   }
 
   private parseCrontab(crontab: string, sunTime?: boolean, timezone?: string, hasFromTo?: boolean) {
@@ -639,23 +628,13 @@ export class NaturalLanguageService {
   private getDeviceMethodFromPath(path: string) {
     // /devices/582a1bddad04460fe3ac527a/comps/1/procs/OnOff/methods/On
 
-    let split = path.split('/');
-    if (split.length >= 8 && split[1] == 'devices' && split[7] == 'methods') {
-      return split[8];
-    }
-
-    return null;
+    return this.extractMethodFromPath(path, 'devices');
   }
 
   private getDeviceAttributeFromPath(path: string) {
     // /devices/582a1bddad04460fe3ac527a/comps/1/procs/OnOff/methods/On
 
-    let split = path.split('/');
-    if (split.length >= 8 && split[1] == 'devices' && split[7] == 'attrs') {
-      return split[8];
-    }
-
-    return null;
+    return this.getAttributeFromPath(path, 'devices');
   }
 
   private parseDuration(duration: any) {
@@ -804,7 +783,11 @@ export class NaturalLanguageService {
         }
       }
 
-      if (condition.path && condition.type == 'device-state') {
+      if (condition.path && (condition.type == 'device-state' || condition.type == 'energy-management')) {
+        var resName = condition.type == 'device-state' ? 'devices' : this.getResourceNameFromPath(condition.path);
+        var processorName = this.getProcessorFromPath(condition.path, resName);
+        var method = this.getMethodFromPath(condition.path, resName);
+        var attribute = this.getAttributeFromPath(condition.path, resName);
         if (typeof val === 'string') {
           description = this.append(description,
             this.setDeviceConditionDescription(condition, 'is equal to', val, device)
@@ -1127,28 +1110,14 @@ export class NaturalLanguageService {
   getDeviceComponentFromPath(path: string) {
     // /devices/582a1bddad04460fe3ac527a/comps/1/procs/OnOff/methods/On
 
-    if (path) {
-      var split = path.split('/');
-      if (split.length >= 8 && split[1] == 'devices' && split[3] == 'comps') {
-        return split[4];
-      }
-    }
-
-    return null;
+    return this.getComponentFromPath(path, 'devices');
   }
 
   getDeviceProcessorFromPath(path: string) {
     // /devices/582a1bddad04460fe3ac527a/comps/1/procs/OnOff/methods/On
-
-    if (path) {
-      var split = path.split('/');
-      if (split.length >= 7 && split[1] == 'devices' && split[5] == 'procs') {
-        return split[6];
-      }
-    }
-
-    return null;
+    return this.getProcessorFromPath(path, 'devices');
   }
+
 
   getControllerDescription(controller: ControllerModel, device: DeviceModel) {
     let desc = '';
@@ -1184,4 +1153,99 @@ export class NaturalLanguageService {
 
     return description;
   }
+
+  extractMethodFromPath(path:any, resName:any) {
+    // /devices/582a1bddad04460fe3ac527a/comps/1/procs/OnOff/methods/On
+
+    if (path) {
+        var split = path.split('/');
+        if (split.length >= 8 && split[1] == resName && split[7] == 'methods') {
+            return split[8];
+        }
+    }
+
+    return null;
+  }
+
+  getProcessorFromPath(path:any, resName:any) {
+    // /devices/582a1bddad04460fe3ac527a/comps/1/procs/OnOff/methods/On
+
+    if (path) {
+        var split = path.split('/');
+        if (split.length >= 7 && split[1] == resName && split[5] == 'procs') {
+            return split[6];
+        }
+    }
+
+    return null;
+  }
+
+  getComponentFromPath(path:any, resName:any) {
+    // /devices/582a1bddad04460fe3ac527a/comps/1/procs/OnOff/methods/On
+
+    if (path) {
+        var split = path.split('/');
+        if (split.length >= 8 && split[1] == resName && split[3] == 'comps') {
+            return split[4];
+        }
+    }
+
+    return null;
+  }
+
+  getAttributeFromPath(path:any, resName:any) {
+    // /devices/582a1bddad04460fe3ac527a/comps/1/procs/OnOff/methods/On
+
+    if (path) {
+        var split = path.split('/');
+        if (split.length >= 8 && split[1] == resName && split[7] == 'attrs') {
+            return split[8];
+        }
+    }
+
+    return null;
+  }
+
+  getResourceNameFromPath(path:any) {
+    if (path) { 
+        var split = path.split('/');
+        if (split.length > 2) {
+            return split[1];
+        }
+    }
+
+    return null;
+  }
+
+  getResourceNameFromParents(resource:any, resName:any) {
+    if (resource.path && resource.parents && Array.isArray(resource.parents[resName])) {
+        var resId = this.getResourceIdFromPath(resource.path, resName);
+
+        if (resId) {
+            for (var i = 0; i < resource.parents[resName].length; i++) {
+                var parent = resource.parents[resName][i];
+
+                if (parent.id.toString() == resId) {
+                    return parent.name;
+                }
+            }
+        }
+    }
+
+    return null;
+  }
+
+  getResourceIdFromPath(path:any, resName:any) {
+    // /areas/582a1bddad04460fe3ac527a/comps/1/procs/OnOff/methods/On
+
+    if (path) {
+        var split = path.split('/');
+        if (split.length > 2 && split[1] == resName) {
+            return split[2];
+        }
+    }
+
+    return null;
+  }
+
 }
