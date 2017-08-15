@@ -372,10 +372,10 @@ export class NaturalLanguageService {
       desc = deviceName + ' Temperature ' + connector + ' ' + val + '°C';
 
     } else if (attrStr === 'period cost') {
-      desc = deviceName + ' cost ' + connector + ' ' + val + ' USD';
+      desc = deviceName + ' consumption cost ' + connector + ' $' + val;
 
     } else if (attrStr === 'period summation') {
-        desc = deviceName + ' consumption ' + connector + ' ' + val + ' kW';
+       desc = deviceName + ' Energy consumption ' + connector + ' ' + val + ' kW';
 
     } else if (attrStr === 'system mode') {
       const idx = parseInt(val);
